@@ -3,7 +3,7 @@ import type { Feature, AnalysisResult } from '../types';
 
 const API_CONFIG = {
   API_URL: "/api/chat", // vite.config.ts 프록시 설정 경로
-  API_KEY: "XqlHd2EhYm24ffn4WCLfsOmpn9jBz3SY", 
+  API_KEY: import.meta.env.VITE_AI_API_KEY,
   MODEL: "claude-4.5-sonnet"
 };
 
