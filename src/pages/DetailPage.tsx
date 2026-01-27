@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, MessageSquarePlus, ShieldCheck } from 'lucide-react';
-// Firebase 서비스 함수 임포트
+import { 
+  ArrowLeft, 
+  CheckCircle, 
+  MessageSquarePlus, 
+  ShieldCheck, 
+  Edit2, 
+  Trash2, 
+  X, 
+  Check
+} from 'lucide-react';
 import { fetchFeatureById, saveFeatureToDB } from '../services/firebaseService';
 import type { Feature, HistoryItem } from '../types';
 import './DetailPage.css';
@@ -11,14 +19,16 @@ const DetailPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // 데이터 복구용 상태 관리
   const [feature, setFeature] = useState<Feature | null>(location.state?.feature || null);
   const [isLoading, setIsLoading] = useState(!feature); 
   const [opinionInput, setOpinionInput] = useState<{ [key: string]: string }>({});
 
-  /**
-   * 새로고침 대응 로직
-   */
+  const [editingInfo, setEditingInfo] = useState<{ historyId: string; index: number } | null>(null);
+  const [editValue, setEditValue] = useState("");
+
+  const rawUser = sessionStorage.getItem('zg_user');
+  const currentUser = rawUser ? JSON.parse(rawUser) : { name: '익명', dept: '미소속' };
+
   useEffect(() => {
     const loadInitialData = async () => {
       if (!feature && id) {
@@ -31,7 +41,8 @@ const DetailPage = () => {
   }, [id, feature]);
 
   /**
-   * 특정 버전 '최종안' 확정 기능
+   * [수정 완료] 특정 버전 '최종안' 확정 기능
+   * 에러 원인: addOpinion의 코드가 잘못 섞여 있었습니다. 
    */
   const toggleFinalize = async (historyId: string) => {
     if (!feature) return;
@@ -47,11 +58,9 @@ const DetailPage = () => {
     const updatedFeature = { 
       ...feature, 
       histories: updatedHistories,
-      // 확정 해제 시에는 기존 정책 유지, 확정 시에는 해당 정책으로 갱신
       currentPolicy: finalizedItem ? finalizedItem.policyChange : feature.currentPolicy
     };
     
-    // 3. 로컬 상태 업데이트 및 Firebase DB 실시간 저장
     setFeature(updatedFeature);
     await saveFeatureToDB(updatedFeature);
   };
@@ -64,15 +73,74 @@ const DetailPage = () => {
     const text = opinionInput[historyId];
     if (!text?.trim()) return;
 
+    const newOpinion = {
+      author: currentUser.name,
+      dept: currentUser.dept,
+      text: text,
+      timestamp: new Date().toLocaleString()
+    };
+
     const updatedHistories = feature.histories.map(h => 
       h.id === historyId 
-        ? { ...h, opinions: [...(h.opinions || []), text] } 
+        ? { ...h, opinions: [...(h.opinions || []) as any[], newOpinion] } 
         : h
     );
 
     const updatedFeature = { ...feature, histories: updatedHistories };
     setFeature(updatedFeature);
     setOpinionInput({ ...opinionInput, [historyId]: '' });
+    await saveFeatureToDB(updatedFeature);
+  };
+
+  /**
+   * 의견 삭제 로직
+   */
+  const deleteOpinion = async (historyId: string, index: number) => {
+    if (!feature || !window.confirm("이 기획 의도를 삭제하시겠습니까?")) return;
+
+    const updatedHistories = feature.histories.map(h => 
+      h.id === historyId 
+        ? { ...h, opinions: h.opinions?.filter((_, i) => i !== index) } 
+        : h
+    );
+
+    const updatedFeature = { ...feature, histories: updatedHistories };
+    setFeature(updatedFeature);
+    await saveFeatureToDB(updatedFeature);
+  };
+
+  /**
+   * [수정 완료] 의견 수정 모드 진입
+   * 에러 원인: 매개변수 이름(currentOp)이 로직과 일치하지 않았습니다.
+   */
+  const startEdit = (historyId: string, index: number, currentOp: any) => {
+    setEditingInfo({ historyId, index });
+    // op가 객체면 .text를, 문자열이면 그대로 값을 가져옵니다.
+    setEditValue(typeof currentOp === 'string' ? currentOp : currentOp.text);
+  };
+
+  /**
+   * 의견 수정 저장
+   */
+  const saveEdit = async () => {
+    if (!feature || !editingInfo) return;
+
+    const updatedHistories = feature.histories.map(h => 
+      h.id === editingInfo.historyId 
+        ? { 
+            ...h, 
+            opinions: h.opinions?.map((op, i) => 
+              i === editingInfo.index 
+                ? (typeof op === 'string' ? editValue : { ...op, text: editValue }) 
+                : op
+            ) 
+          } 
+        : h
+    );
+
+    const updatedFeature = { ...feature, histories: updatedHistories };
+    setFeature(updatedFeature);
+    setEditingInfo(null);
     await saveFeatureToDB(updatedFeature);
   };
 
@@ -95,17 +163,13 @@ const DetailPage = () => {
         </div>
 
         <div className="history-timeline">
-          {feature.histories.map((history: HistoryItem, index: number) => (
-            <div 
-              key={history.id} 
-              className={`history-card ${history.isFinalized ? 'finalized' : ''}`}
-            >
+          {feature.histories
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+            .map((history: HistoryItem, index: number) => (
+            <div key={history.id} className={`history-card ${history.isFinalized ? 'finalized' : ''}`}>
               <div className="card-header">
                 <div className="version-info">
-                   {/* 버전 표기: 정수 형태 (v1, v2...) */}
-                   <span className="version-tag">
-                     v1.{feature.histories.length - 1 - index}
-                   </span>
+                   <span className="version-tag">v1.{feature.histories.length - 1 - index}</span>
                    <span className="timestamp">{history.timestamp}</span>
                 </div>
                 
@@ -124,19 +188,57 @@ const DetailPage = () => {
                   <p className="what-content">{history.policyChange}</p>
                 </div>
                 <div className="why-section">
-                  <p className="why-label">
-                    <ShieldCheck className="why-icon" /> Context (Why)
-                  </p>
+                  <p className="why-label"><ShieldCheck className="why-icon" /> Context (Why)</p>
                   <p className="why-content">{history.context}</p>
                 </div>
               </div>
 
               <div className="opinions-section">
                 <div className="opinions-list">
-                  {history.opinions?.map((op, i) => (
+                  {history.opinions?.map((op: any, i: number) => (
                     <div key={i} className="opinion-item">
-                      <div className="opinion-avatar">ME</div>
-                      <p className="opinion-text">{op}</p>
+                      <div className="opinion-avatar">
+                        {typeof op === 'string' ? 'ME' : op.author?.[0] || '익'}
+                      </div>
+
+                      <div className="opinion-content-wrapper">
+                        <div className="opinion-info-row">
+                          <span className="opinion-author">
+                            {typeof op === 'string' ? '이전 기록' : op.author}
+                          </span>
+                          <span className="opinion-dept">
+                            {typeof op === 'string' ? '' : `(${op.dept})`}
+                          </span>
+                        </div>
+
+                        {editingInfo?.historyId === history.id && editingInfo?.index === i ? (
+                          <div className="edit-container">
+                            <input 
+                              type="text" 
+                              value={editValue} 
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="opinion-edit-input"
+                              autoFocus
+                            />
+                            <button onClick={saveEdit} className="icon-btn save"><Check size={14}/></button>
+                            <button onClick={() => setEditingInfo(null)} className="icon-btn cancel"><X size={14}/></button>
+                          </div>
+                        ) : (
+                          <div className="opinion-text-container">
+                            <p className="opinion-text">
+                              {typeof op === 'string' ? op : op.text}
+                            </p>
+                            <div className="opinion-actions">
+                              <button onClick={() => startEdit(history.id, i, op)} className="icon-btn edit">
+                                <Edit2 size={12}/>
+                              </button>
+                              <button onClick={() => deleteOpinion(history.id, i)} className="icon-btn delete">
+                                <Trash2 size={12}/>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -146,13 +248,10 @@ const DetailPage = () => {
                     type="text"
                     value={opinionInput[history.id] || ''}
                     onChange={(e) => setOpinionInput({ ...opinionInput, [history.id]: e.target.value })}
-                    placeholder="팀원들과 기획 의도를 나눠보세요..."
+                    placeholder={`${currentUser.name}님, 기획 의도를 남겨주세요...`}
                     className="opinion-input"
                   />
-                  <button 
-                    onClick={() => addOpinion(history.id)}
-                    className="opinion-submit-button"
-                  >
+                  <button onClick={() => addOpinion(history.id)} className="opinion-submit-button">
                     <MessageSquarePlus className="opinion-submit-icon" />
                   </button>
                 </div>

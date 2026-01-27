@@ -1,6 +1,7 @@
 /* ============================================
    DETAIL PAGE - ZERO-GAP
    B2B SaaS Premium Style | Feature Detail View
+   Updated: Opinion with Author Info
    ============================================ */
 
 /* ============================================
@@ -157,7 +158,6 @@
 .history-card:nth-child(2) { animation-delay: 0.2s; }
 .history-card:nth-child(3) { animation-delay: 0.3s; }
 
-/* Finalized State */
 .history-card.finalized {
   border-color: #3b82f6;
   box-shadow: 
@@ -178,7 +178,7 @@
 }
 
 /* ============================================
-   7. CARD HEADER (Version Info + Finalize Button)
+   7. CARD HEADER
    ============================================ */
 .card-header {
   display: flex;
@@ -189,14 +189,12 @@
   flex-wrap: wrap;
 }
 
-/* Version Info Container */
 .version-info {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-/* Version Tag (Badge Style) */
 .version-tag {
   display: inline-flex;
   align-items: center;
@@ -213,14 +211,12 @@
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Finalized 상태의 Version Tag */
 .history-card.finalized .version-tag {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
   animation: versionPulse 2s ease-in-out infinite;
 }
 
-/* Timestamp */
 .timestamp {
   font-size: 0.75rem;
   font-weight: 600;
@@ -229,7 +225,6 @@
   letter-spacing: 0.05em;
 }
 
-/* Finalize Button */
 .finalize-button {
   display: flex;
   align-items: center;
@@ -287,7 +282,6 @@
   }
 }
 
-/* WHAT Section (Policy) */
 .what-section {
   display: flex;
   flex-direction: column;
@@ -313,7 +307,6 @@
   margin: 0;
 }
 
-/* WHY Section (Context) */
 .why-section {
   display: flex;
   flex-direction: column;
@@ -355,7 +348,7 @@
 }
 
 /* ============================================
-   9. OPINIONS SECTION (피드백 영역)
+   9. OPINIONS SECTION (Updated)
    ============================================ */
 .opinions-section {
   margin-top: 2rem;
@@ -370,6 +363,9 @@
   margin-bottom: 1rem;
 }
 
+/* ============================================
+   10. OPINION ITEM (Updated with Author Info)
+   ============================================ */
 .opinion-item {
   display: flex;
   align-items: flex-start;
@@ -378,20 +374,63 @@
   padding: 0.875rem 1rem;
   border-radius: 1rem;
   animation: slideInFromBottom 0.3s ease-out;
+  transition: all 0.2s ease;
 }
 
+.opinion-item:hover {
+  background: #f1f5f9;
+}
+
+/* Opinion Avatar */
 .opinion-avatar {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 9999px;
   background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
   color: #2563eb;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 700;
   flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+/* Opinion Content Wrapper */
+.opinion-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Opinion Info Row (Author + Department) */
+.opinion-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+
+.opinion-author {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.opinion-dept {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Opinion Text Container */
+.opinion-text-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .opinion-text {
@@ -400,10 +439,119 @@
   line-height: 1.6;
   margin: 0;
   flex: 1;
+  word-break: break-word;
 }
 
 /* ============================================
-   10. OPINION INPUT FORM
+   11. OPINION ACTIONS (Edit/Delete)
+   ============================================ */
+.opinion-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.opinion-item:hover .opinion-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.icon-btn.edit {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.icon-btn.edit:hover {
+  background: #dbeafe;
+  color: #2563eb;
+  transform: scale(1.1);
+}
+
+.icon-btn.delete {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.icon-btn.delete:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  transform: scale(1.1);
+}
+
+.icon-btn.save {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+
+.icon-btn.save:hover {
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+  transform: scale(1.1);
+}
+
+.icon-btn.cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.icon-btn.cancel:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: scale(1.1);
+}
+
+.icon-btn:active {
+  transform: scale(0.95);
+}
+
+/* ============================================
+   12. EDIT CONTAINER
+   ============================================ */
+.edit-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.opinion-edit-input {
+  flex: 1;
+  background: white;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.opinion-edit-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* ============================================
+   13. OPINION INPUT FORM
    ============================================ */
 .opinion-input-container {
   display: flex;
@@ -461,61 +609,7 @@
 }
 
 /* ============================================
-   11. ANIMATIONS
-   ============================================ */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes textPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
-
-@keyframes versionPulse {
-  0%, 100% {
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-  }
-  50% {
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-  }
-}
-
-/* ============================================
-   12. RESPONSIVE DESIGN
+   14. RESPONSIVE DESIGN
    ============================================ */
 
 /* 모바일 (767px 이하) */
@@ -568,6 +662,37 @@
   .why-content {
     font-size: 0.8125rem;
   }
+
+  /* 모바일에서는 항상 액션 버튼 표시 */
+  .opinion-actions {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .opinion-text-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .opinion-actions {
+    align-self: flex-end;
+  }
+
+  .icon-btn {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .edit-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .icon-btn.save,
+  .icon-btn.cancel {
+    width: 100%;
+    height: 2rem;
+  }
 }
 
 /* 태블릿 (768px ~ 1023px) */
@@ -587,6 +712,11 @@
   .version-tag {
     font-size: 0.8125rem;
   }
+
+  .icon-btn {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
 }
 
 /* 데스크톱 (1024px 이상) */
@@ -601,7 +731,72 @@
 }
 
 /* ============================================
-   13. ACCESSIBILITY
+   15. ANIMATIONS
+   ============================================ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes textPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes versionPulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+  }
+}
+
+@keyframes opinionFadeOut {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+}
+
+/* ============================================
+   16. ACCESSIBILITY
    ============================================ */
 .back-button:focus-visible,
 .finalize-button:focus-visible,
@@ -610,18 +805,34 @@
   outline-offset: 2px;
 }
 
-.opinion-input:focus-visible {
+.icon-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.icon-btn.delete:focus-visible {
+  outline-color: #ef4444;
+}
+
+.icon-btn.save:focus-visible {
+  outline-color: #10b981;
+}
+
+.opinion-input:focus-visible,
+.opinion-edit-input:focus-visible {
   outline: none;
 }
 
 /* ============================================
-   14. PRINT STYLES
+   17. PRINT STYLES
    ============================================ */
 @media print {
   .detail-header,
   .back-button,
   .finalize-button,
-  .opinion-input-container {
+  .opinion-input-container,
+  .opinion-actions,
+  .icon-btn {
     display: none;
   }
 
@@ -630,10 +841,14 @@
     box-shadow: none;
     border: 1px solid #e2e8f0;
   }
+
+  .opinion-text-container {
+    justify-content: flex-start;
+  }
 }
 
 /* ============================================
-   15. REDUCED MOTION SUPPORT
+   18. REDUCED MOTION SUPPORT
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -642,5 +857,10 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .icon-btn:hover,
+  .back-button:hover .back-button-icon {
+    transform: none;
   }
 }

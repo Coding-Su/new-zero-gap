@@ -6,8 +6,10 @@ export interface HistoryItem {
   timestamp: string;
   policyChange: string; // What
   context: string;      // Why
-  opinions?: string[];  // [추가] 사용자의 추가 의견
-  isFinalized?: boolean; // [추가] 해당 버전의 확정 여부
+  isFinalized?: boolean; // 해당 버전의 확정 여부
+  author?: string;
+  dept?: string;
+  opinions?: (string | Opinion)[];  // 사용자의 추가 의견
 }
 
 // 2. 메인 화면에 보일 개별 기능(Chip) 정보
@@ -25,4 +27,12 @@ export interface AnalysisResult {
   title: string;           // 기능명
   policy: string;          // 추출된 정책 (What)
   reason: string;          // 추출된 배경 (Why)
+}
+
+// 새로운 Opinion 인터페이스 정의
+export interface Opinion {
+  author: string;
+  dept: string;
+  text: string;
+  timestamp: string;
 }

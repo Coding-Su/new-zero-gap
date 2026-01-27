@@ -24,16 +24,20 @@ export const analyzeMeetingMinutes = async (
 당신은 10년 차 수석 IT 서비스 기획자입니다. 사용자가 입력한 회의록을 분석하여 개발팀이 즉시 참고할 수 있는 [정책]을 도출하세요.
 
 [분석 가이드라인]
-1. What (policy): 결정된 사항을 무엇을 개발해야 하는가의 관점에서 간결하게 작성하세요.
-2. Why (reason): 이 정책이 왜 결정되었는지 논의 배경과 근거를 구체적으로 기술하세요 (멘토님 강조 포인트).
-3. Feature Matching: 아래의 [기존 기능 리스트]를 참고하여 업데이트라면 해당 ID를, 신규 기능이라면 'new'를 matchId에 넣으세요.
+1. 독립성 유지: 회의록에서 논의된 각 기능(A, B, C 등)은 반드시 서로 다른 '개별 객체'로 분리하여 JSON 배열에 담으세요.
+2. What (policy): 결정된 사항을 무엇을 개발해야 하는가의 관점에서 간결하게 작성하세요.
+3. Why (reason): 이 정책이 왜 결정되었는지 논의 배경과 근거를 구체적으로 기술하세요 (멘토님 강조 포인트).
+4. Feature Matching: 아래의 [기존 기능 리스트]를 참고하여 업데이트라면 해당 ID를, 신규 기능이라면 'new'를 matchId에 넣으세요.
 
 [기존 기능 리스트]
 ${featureContext}
 
-반드시 JSON 배열 형식으로만 응답하세요.
-응답 예시: [{"matchId": "id", "title": "제목", "policy": "내용", "reason": "이유"}]
-  `;
+반드시 JSON 배열 형식으로만 응답하세요. 여러 기능이 감지되면 객체를 그만큼 늘리세요.
+응답 예시: [
+  {"matchId": "id1", "title": "기능A", "policy": "정책A", "reason": "이유A"},
+  {"matchId": "new", "title": "기능B", "policy": "정책B", "reason": "이유B"}
+]
+`;
 
   // 3. 포텐스닷 성공 방식: prompt 필드로 합치기
   const finalPrompt = `${SYSTEM_PROMPT}\n\n[사용자 회의록]\n${minutes}`;
