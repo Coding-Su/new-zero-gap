@@ -1,15 +1,13 @@
-// src/firebase.ts
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 
-//에 있는 본인의 설정을 여기에 붙여넣으세요.
 const firebaseConfig = {
-  apiKey: "AIzaSy...", 
-  authDomain: "zero-gap-42996.firebaseapp.com",
-  projectId: "zero-gap-42996",
-  storageBucket: "zero-gap-42996.firebasestorage.app",
-  messagingSenderId: "107583385238",
-  appId: "1:107583385238:web:..." 
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
