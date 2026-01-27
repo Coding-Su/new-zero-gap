@@ -1,28 +1,66 @@
-import { useState } from 'react'; // React 삭제 (밑줄 1번 해결)
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, MessageSquarePlus, ShieldCheck } from 'lucide-react';
+// Firebase 서비스 함수 임포트
+import { fetchFeatureById, saveFeatureToDB } from '../services/firebaseService';
 import type { Feature, HistoryItem } from '../types';
 import './DetailPage.css';
 
 const DetailPage = () => {
+  const { id } = useParams<{ id: string }>(); 
   const location = useLocation();
   const navigate = useNavigate();
+  
+  // 데이터 복구용 상태 관리
   const [feature, setFeature] = useState<Feature | null>(location.state?.feature || null);
+  const [isLoading, setIsLoading] = useState(!feature); 
   const [opinionInput, setOpinionInput] = useState<{ [key: string]: string }>({});
 
-  if (!feature) return <div className="empty-state">데이터가 없습니다.</div>;
+  /**
+   * 새로고침 대응 로직
+   */
+  useEffect(() => {
+    const loadInitialData = async () => {
+      if (!feature && id) {
+        const data = await fetchFeatureById(id);
+        setFeature(data);
+      }
+      setIsLoading(false);
+    };
+    loadInitialData();
+  }, [id, feature]);
 
-  // 특정 버전을 확정 상태로 변경
-  const toggleFinalize = (historyId: string) => {
+  /**
+   * 특정 버전 '최종안' 확정 기능
+   */
+  const toggleFinalize = async (historyId: string) => {
+    if (!feature) return;
+
+    // 1. 선택한 히스토리만 finalized 처리 (나머지는 false로 초기화)
     const updatedHistories = feature.histories.map(h => ({
       ...h,
       isFinalized: h.id === historyId ? !h.isFinalized : false 
     }));
-    setFeature({ ...feature, histories: updatedHistories });
+    
+    // 2. 확정된 항목이 있다면 해당 정책을 전체 기능의 '현재 정책'으로 승격
+    const finalizedItem = updatedHistories.find(h => h.isFinalized);
+    const updatedFeature = { 
+      ...feature, 
+      histories: updatedHistories,
+      // 확정 해제 시에는 기존 정책 유지, 확정 시에는 해당 정책으로 갱신
+      currentPolicy: finalizedItem ? finalizedItem.policyChange : feature.currentPolicy
+    };
+    
+    // 3. 로컬 상태 업데이트 및 Firebase DB 실시간 저장
+    setFeature(updatedFeature);
+    await saveFeatureToDB(updatedFeature);
   };
 
-  // 의견 추가 (밑줄 3번 해결: 아래 버튼과 연결)
-  const addOpinion = (historyId: string) => {
+  /**
+   * 의견 추가 로직
+   */
+  const addOpinion = async (historyId: string) => {
+    if (!feature) return;
     const text = opinionInput[historyId];
     if (!text?.trim()) return;
 
@@ -32,9 +70,14 @@ const DetailPage = () => {
         : h
     );
 
-    setFeature({ ...feature, histories: updatedHistories });
+    const updatedFeature = { ...feature, histories: updatedHistories };
+    setFeature(updatedFeature);
     setOpinionInput({ ...opinionInput, [historyId]: '' });
+    await saveFeatureToDB(updatedFeature);
   };
+
+  if (isLoading) return <div className="loading-state">데이터를 불러오는 중...</div>;
+  if (!feature) return <div className="empty-state">데이터를 찾을 수 없습니다.</div>;
 
   return (
     <div className="detail-page-root">
@@ -52,13 +95,20 @@ const DetailPage = () => {
         </div>
 
         <div className="history-timeline">
-          {feature.histories.map((history: HistoryItem) => (
+          {feature.histories.map((history: HistoryItem, index: number) => (
             <div 
               key={history.id} 
               className={`history-card ${history.isFinalized ? 'finalized' : ''}`}
             >
               <div className="card-header">
-                <span className="timestamp">{history.timestamp}</span>
+                <div className="version-info">
+                   {/* 버전 표기: 정수 형태 (v1, v2...) */}
+                   <span className="version-tag">
+                     v1.{feature.histories.length - 1 - index}
+                   </span>
+                   <span className="timestamp">{history.timestamp}</span>
+                </div>
+                
                 <button 
                   onClick={() => toggleFinalize(history.id)}
                   className={`finalize-button ${history.isFinalized ? 'active' : 'inactive'}`}
@@ -81,7 +131,6 @@ const DetailPage = () => {
                 </div>
               </div>
 
-              {/* 하단 의견 및 피드백 영역 */}
               <div className="opinions-section">
                 <div className="opinions-list">
                   {history.opinions?.map((op, i) => (
@@ -100,7 +149,6 @@ const DetailPage = () => {
                     placeholder="팀원들과 기획 의도를 나눠보세요..."
                     className="opinion-input"
                   />
-                  {/* 밑줄 2번 해결: MessageSquarePlus 아이콘 사용 */}
                   <button 
                     onClick={() => addOpinion(history.id)}
                     className="opinion-submit-button"

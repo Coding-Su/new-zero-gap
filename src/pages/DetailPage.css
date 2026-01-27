@@ -13,7 +13,41 @@
 }
 
 /* ============================================
-   1. HEADER (Sticky Navigation)
+   1. LOADING & EMPTY STATES
+   ============================================ */
+.loading-state {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #64748b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+.empty-state {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #94a3b8;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.empty-state::before {
+  content: '📭';
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+/* ============================================
+   2. HEADER (Sticky Navigation)
    ============================================ */
 .detail-header {
   background: white;
@@ -65,7 +99,7 @@
 }
 
 /* ============================================
-   2. MAIN CONTENT CONTAINER
+   3. MAIN CONTENT CONTAINER
    ============================================ */
 .detail-main {
   max-width: 64rem;
@@ -74,7 +108,7 @@
 }
 
 /* ============================================
-   3. PAGE TITLE SECTION
+   4. PAGE TITLE SECTION
    ============================================ */
 .title-section {
   margin-bottom: 2rem;
@@ -99,7 +133,7 @@
 }
 
 /* ============================================
-   4. HISTORY TIMELINE CONTAINER
+   5. HISTORY TIMELINE CONTAINER
    ============================================ */
 .history-timeline {
   display: flex;
@@ -108,7 +142,7 @@
 }
 
 /* ============================================
-   5. HISTORY CARD (Version Card)
+   6. HISTORY CARD (Version Card)
    ============================================ */
 .history-card {
   background: white;
@@ -144,7 +178,7 @@
 }
 
 /* ============================================
-   6. CARD HEADER (Timestamp + Finalize Button)
+   7. CARD HEADER (Version Info + Finalize Button)
    ============================================ */
 .card-header {
   display: flex;
@@ -152,16 +186,50 @@
   align-items: center;
   margin-bottom: 1.5rem;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
+/* Version Info Container */
+.version-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Version Tag (Badge Style) */
+.version-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.375rem 0.875rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Finalized 상태의 Version Tag */
+.history-card.finalized .version-tag {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  animation: versionPulse 2s ease-in-out infinite;
+}
+
+/* Timestamp */
 .timestamp {
   font-size: 0.75rem;
-  font-weight: 700;
-  color: #cbd5e1;
+  font-weight: 600;
+  color: #94a3b8;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
+/* Finalize Button */
 .finalize-button {
   display: flex;
   align-items: center;
@@ -204,7 +272,7 @@
 }
 
 /* ============================================
-   7. WHAT/WHY 2-COLUMN LAYOUT
+   8. WHAT/WHY 2-COLUMN LAYOUT
    ============================================ */
 .what-why-grid {
   display: grid;
@@ -287,7 +355,7 @@
 }
 
 /* ============================================
-   8. OPINIONS SECTION (피드백 영역)
+   9. OPINIONS SECTION (피드백 영역)
    ============================================ */
 .opinions-section {
   margin-top: 2rem;
@@ -335,7 +403,7 @@
 }
 
 /* ============================================
-   9. OPINION INPUT FORM
+   10. OPINION INPUT FORM
    ============================================ */
 .opinion-input-container {
   display: flex;
@@ -393,17 +461,6 @@
 }
 
 /* ============================================
-   10. EMPTY STATE
-   ============================================ */
-.empty-state {
-  padding: 2.5rem;
-  text-align: center;
-  font-weight: 700;
-  color: #94a3b8;
-  font-size: 1.125rem;
-}
-
-/* ============================================
    11. ANIMATIONS
    ============================================ */
 @keyframes fadeInUp {
@@ -425,6 +482,35 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes textPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes versionPulse {
+  0%, 100% {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
   }
 }
 
@@ -453,7 +539,21 @@
   .card-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 1rem;
+  }
+
+  .version-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .version-tag {
+    font-size: 0.75rem;
+    padding: 0.3125rem 0.75rem;
+  }
+
+  .timestamp {
+    font-size: 0.6875rem;
   }
 
   .finalize-button {
@@ -478,6 +578,14 @@
 
   .feature-title {
     font-size: 2.25rem;
+  }
+
+  .version-info {
+    gap: 0.625rem;
+  }
+
+  .version-tag {
+    font-size: 0.8125rem;
   }
 }
 

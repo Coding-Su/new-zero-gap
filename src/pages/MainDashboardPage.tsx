@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import IntegratedInput from '../components/dashboard/IntegratedInput';
 import FeatureCard from '../components/dashboard/FeatureCard';
 import type { Feature, HistoryItem } from '../types';
 import { analyzeMeetingMinutes } from '../api/aiService';
 import LoadingOverlay from '../components/dashboard/LoadingOverlay';
+import { fetchFeaturesFromDB, saveFeatureToDB } from '../services/firebaseService';
 import './MainDashboardPage.css';
 
 const MainDashboardPage = () => {
@@ -12,37 +13,54 @@ const MainDashboardPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // [단계 1] 앱 접속 시 DB에서 데이터 불러오기
+  useEffect(() => {
+    const initData = async () => {
+      const data = await fetchFeaturesFromDB();
+      if (data.length > 0) setFeatures(data);
+    };
+    initData();
+  }, []);
+
   const handleAnalyze = async (minutes: string) => {
     setIsLoading(true);
     try {
       const results = await analyzeMeetingMinutes(minutes, features);
       
-      setFeatures(prev => {
-        let updated = [...prev];
-        results.forEach(res => {
-          const newHist: HistoryItem = {
-            id: crypto.randomUUID(),
-            timestamp: new Date().toLocaleString(),
-            policyChange: res.policy,
-            context: res.reason
-          };
+      // 1. 새로운 상태(updated)를 계산
+      let updatedFeatures: Feature[] = [...features];
+
+      results.forEach(res => {
+        const newHist: HistoryItem = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toLocaleString(),
+          policyChange: res.policy,
+          context: res.reason
+        };
           
           if (res.matchId === 'new') {
-            updated.push({
-              id: crypto.randomUUID(),
-              title: res.title,
-              description: `${res.title} 분석 결과`,
-              currentPolicy: res.policy,
-              histories: [newHist]
-            });
-          } else {
-            updated = updated.map(f => 
-              f.id === res.matchId ? { ...f, currentPolicy: res.policy, histories: [newHist, ...f.histories] } : f
-            );
-          }
-        });
-        return updated;
+          updatedFeatures.push({
+            id: crypto.randomUUID(),
+            title: res.title,
+            description: `${res.title} 분석 결과`,
+            currentPolicy: res.policy,
+            histories: [newHist]
+          });
+        } else {
+          updatedFeatures = updatedFeatures.map(f => 
+            f.id === res.matchId ? { ...f, currentPolicy: res.policy, histories: [newHist, ...f.histories] } : f
+          );
+        }
       });
+      
+      // 2. 계산된 결과를 Firebase DB에 하나씩 저장
+      for (const feature of updatedFeatures) {
+        await saveFeatureToDB(feature);
+      }
+
+      // 3. 화면(State)을 업데이트
+      setFeatures(updatedFeatures);
+
     } catch (error) {
       console.error("분석 실패:", error);
     } finally {
@@ -84,8 +102,8 @@ const MainDashboardPage = () => {
 
           {features.length === 0 ? (
             <div className="empty-state-box">
-              <p className="text-2xl font-bold text-white mb-2">분석된 데이터가 없습니다.</p>
-              <p className="text-gray-500">회의록을 입력하여 실시간 기획 분석을 경험해 보세요.</p>
+              <p className="empty-state-title">분석된 데이터가 없습니다.</p>
+              <p className="empty-state-subtitle">회의록을 입력하여 실시간 기획 분석을 경험해 보세요.</p>
             </div>
           ) : (
             <div className="zg-feature-grid">

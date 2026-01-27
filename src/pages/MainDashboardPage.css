@@ -150,7 +150,7 @@
   animation: pulse 4s ease-in-out infinite;
 }
 
-.empty-state-box p:first-child {
+.empty-state-title {
   font-size: 1.25rem;
   font-weight: 700;
   color: white;
@@ -159,12 +159,21 @@
   z-index: 1;
 }
 
-.empty-state-box p:last-child {
+.empty-state-subtitle {
   font-size: 0.9375rem;
   color: #94a3b8;
   margin: 0;
   position: relative;
   z-index: 1;
+}
+
+@keyframes emptyStatePulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* ============================================

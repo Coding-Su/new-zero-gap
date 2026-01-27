@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Feature } from '../../types';
-import { Calendar, MessageSquare } from 'lucide-react';
+import { Calendar, MessageSquare, CheckCircle } from 'lucide-react';
 import './FeatureCard.css';
 
 interface Props {
@@ -9,14 +9,31 @@ interface Props {
 
 const FeatureCard: React.FC<Props> = ({ feature }) => {
   const latestHistory = feature.histories[0];
+  const totalVersions = feature.histories.length;
+  
+  // Finalized 버전이 있는지 확인
+  const hasFinalizedVersion = feature.histories.some(h => h.isFinalized);
+  
+  // 전체 의견 개수 계산
+  const totalOpinions = feature.histories.reduce((sum, h) => sum + (h.opinions?.length || 0), 0);
 
   return (
-    <div className="feature-card">
+    <div className={`feature-card ${hasFinalizedVersion ? 'has-finalized' : ''}`}>
       <div className="feature-card-header">
         <h3 className="feature-card-title">{feature.title}</h3>
-        <span className="feature-card-badge">
-          v{feature.histories.length}
-        </span>
+        <div className="badge-group">
+          {/* 최신 버전 배지 */}
+          <span className="feature-card-badge version">
+            v1.{totalVersions - 1}
+          </span>
+          {/* Finalized 배지 (있을 경우만 표시) */}
+          {hasFinalizedVersion && (
+            <span className="feature-card-badge finalized">
+              <CheckCircle className="badge-icon" />
+              Final
+            </span>
+          )}
+        </div>
       </div>
       
       <div className="feature-card-body">
@@ -32,8 +49,15 @@ const FeatureCard: React.FC<Props> = ({ feature }) => {
           </div>
           <div className="footer-item">
             <MessageSquare className="footer-icon" />
-            <span>{feature.histories.length} 개의 맥락 쌓임</span>
+            <span>{totalVersions}개 버전</span>
           </div>
+          {/* 의견이 있을 경우만 표시 */}
+          {totalOpinions > 0 && (
+            <div className="footer-item opinions">
+              <span className="opinion-count">{totalOpinions}</span>
+              <span>의견</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
