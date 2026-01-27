@@ -1,0 +1,414 @@
+/* ============================================
+   MAIN DASHBOARD PAGE - ZERO-GAP
+   B2B SaaS Premium Style | Responsive Design
+   ============================================ */
+
+/* ============================================
+   0. RESET & BOX-SIZING
+   ============================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ============================================
+   1. ROOT & LAYOUT
+   ============================================ */
+.dashboard-root {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.dashboard-inner {
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ============================================
+   2. HEADER SECTION
+   ============================================ */
+.dashboard-header {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.dashboard-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e3a5f;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.dashboard-title .dot {
+  color: #3b82f6;
+  font-size: 3rem;
+  line-height: 0;
+}
+
+.dashboard-subtitle {
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ============================================
+   3. INPUT SECTION CARD
+   ============================================ */
+.input-section-card {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1.75rem;
+  box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+  border: 1px solid #e2e8f0;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+  overflow: hidden;
+}
+
+/* ============================================
+   4. FEATURES SECTION
+   ============================================ */
+.features-section {
+  animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.features-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.features-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.625rem;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-radius: 9999px;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  animation: scaleIn 0.3s ease-out;
+}
+
+.helper-text {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ============================================
+   5. EMPTY STATE
+   ============================================ */
+.empty-state-box {
+  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8a 100%);
+  border-radius: 1.5rem;
+  padding: 3rem 2rem;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.empty-state-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  animation: pulse 4s ease-in-out infinite;
+}
+
+.empty-state-box p:first-child {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.empty-state-box p:last-child {
+  font-size: 0.9375rem;
+  color: #94a3b8;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   6. FEATURE GRID
+   ============================================ */
+.zg-feature-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: 1fr; /* 모바일: 1열 */
+}
+
+.card-hover-wrapper {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  border-radius: 1rem;
+}
+
+.card-hover-wrapper:hover {
+  transform: translateY(-4px);
+}
+
+.card-hover-wrapper:active {
+  transform: translateY(-2px);
+}
+
+.card-hover-wrapper:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 4px;
+}
+
+/* ============================================
+   7. RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* 태블릿 (768px 이상) */
+@media (min-width: 768px) {
+  .dashboard-root {
+    padding: 2rem;
+  }
+
+  .dashboard-inner {
+    gap: 2rem;
+  }
+
+  .dashboard-header {
+    padding: 2rem 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 3rem;
+  }
+
+  .dashboard-title .dot {
+    font-size: 3.5rem;
+  }
+
+  .dashboard-subtitle {
+    font-size: 1.125rem;
+  }
+
+  .input-section-card {
+    padding: 2rem;
+  }
+
+  .empty-state-box {
+    padding: 4rem 2.5rem;
+  }
+
+  .section-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .features-title {
+    font-size: 1.75rem;
+  }
+
+  /* 태블릿: 2열 그리드 */
+  .zg-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+/* 데스크톱 (1024px 이상) */
+@media (min-width: 1024px) {
+  .dashboard-root {
+    padding: 2.5rem;
+  }
+
+  .dashboard-inner {
+    gap: 2.5rem;
+  }
+
+  .dashboard-header {
+    padding: 2.5rem 1rem;
+  }
+
+  .input-section-card {
+    padding: 2.25rem;
+  }
+
+  .features-title {
+    font-size: 2rem;
+  }
+
+  /* 데스크톱: 3열 그리드 */
+  .zg-feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.75rem;
+  }
+}
+
+/* 대형 데스크톱 (1440px 이상) */
+@media (min-width: 1440px) {
+  .dashboard-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .zg-feature-grid {
+    gap: 2rem;
+  }
+}
+
+/* ============================================
+   8. ANIMATIONS
+   ============================================ */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* ============================================
+   9. UTILITY CLASSES
+   ============================================ */
+.text-2xl {
+  font-size: 1.5rem;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-white {
+  color: white;
+}
+
+.text-gray-500 {
+  color: #64748b;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .sm\:block {
+    display: block;
+  }
+}
+
+/* ============================================
+   10. ACCESSIBILITY & FOCUS STATES
+   ============================================ */
+.card-hover-wrapper:focus {
+  outline: none;
+}
+
+/* ============================================
+   11. REDUCED MOTION SUPPORT
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   12. PRINT STYLES
+   ============================================ */
+@media print {
+  .dashboard-root {
+    background: white;
+    padding: 0;
+  }
+
+  .input-section-card {
+    display: none;
+  }
+
+  .card-hover-wrapper {
+    break-inside: avoid;
+  }
+
+  .empty-state-box {
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: black;
+  }
+}

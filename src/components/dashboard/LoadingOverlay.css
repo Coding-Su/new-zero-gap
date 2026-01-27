@@ -1,0 +1,408 @@
+/* ============================================
+   LOADING OVERLAY - PREMIUM GLASSMORPHISM
+   B2B SaaS Style with Advanced Animations
+   ============================================ */
+
+/* ============================================
+   1. OVERLAY CONTAINER
+   ============================================ */
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: overlayFadeIn 0.4s ease-out;
+}
+
+/* ============================================
+   2. LOADER CONTENT CARD
+   ============================================ */
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 3rem 3.5rem;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: 2rem;
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.35),
+    0 10px 30px rgba(59, 130, 246, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
+  animation: contentScaleIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle gradient background */
+.loader-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at center,
+    rgba(59, 130, 246, 0.03) 0%,
+    transparent 70%
+  );
+  animation: rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+/* ============================================
+   3. PREMIUM SPINNER (다중 링 디자인)
+   ============================================ */
+.premium-spinner {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Outer rotating ring */
+.premium-spinner::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 4px solid transparent;
+  border-top-color: #3b82f6;
+  border-right-color: #3b82f6;
+  border-radius: 50%;
+  animation: spinClockwise 1.5s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+/* Middle rotating ring */
+.premium-spinner::after {
+  content: '';
+  position: absolute;
+  width: 75%;
+  height: 75%;
+  border: 3px solid transparent;
+  border-bottom-color: #60a5fa;
+  border-left-color: #60a5fa;
+  border-radius: 50%;
+  animation: spinCounterClockwise 1.2s cubic-bezier(0.68, -0.55, 0.27, 1.55) infinite;
+}
+
+/* Inner ring */
+.inner-ring {
+  width: 50%;
+  height: 50%;
+  border: 2px solid transparent;
+  border-top-color: #93c5fd;
+  border-radius: 50%;
+  animation: spinClockwise 1s linear infinite;
+  position: relative;
+  z-index: 2;
+}
+
+/* Glow effect behind spinner */
+.glow-effect {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.3) 0%,
+    rgba(59, 130, 246, 0.1) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* ============================================
+   4. TEXT GROUP
+   ============================================ */
+.loading-text-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  max-width: 400px;
+}
+
+.loading-main-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+  animation: textPulse 2s ease-in-out infinite;
+}
+
+.loading-sub-text {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.6;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+/* ============================================
+   5. ANIMATIONS
+   ============================================ */
+
+/* Overlay fade in */
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Content scale in with bounce */
+@keyframes contentScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Clockwise rotation */
+@keyframes spinClockwise {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Counter-clockwise rotation */
+@keyframes spinCounterClockwise {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Pulse animation for glow */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Text pulse */
+@keyframes textPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Fade in up */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Background rotation */
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   6. RESPONSIVE DESIGN
+   ============================================ */
+
+/* 모바일 (767px 이하) */
+@media (max-width: 767px) {
+  .loader-content {
+    padding: 2.5rem 2rem;
+    margin: 0 1rem;
+    gap: 1.5rem;
+  }
+
+  .premium-spinner {
+    width: 80px;
+    height: 80px;
+  }
+
+  .premium-spinner::before {
+    border-width: 3px;
+  }
+
+  .premium-spinner::after {
+    border-width: 2px;
+  }
+
+  .inner-ring {
+    border-width: 1.5px;
+  }
+
+  .loading-main-text {
+    font-size: 1.25rem;
+  }
+
+  .loading-sub-text {
+    font-size: 0.875rem;
+  }
+
+  .loading-text-group {
+    max-width: 300px;
+  }
+}
+
+/* 태블릿 (768px ~ 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .loader-content {
+    padding: 2.75rem 3rem;
+  }
+
+  .premium-spinner {
+    width: 90px;
+    height: 90px;
+  }
+
+  .loading-main-text {
+    font-size: 1.375rem;
+  }
+}
+
+/* 데스크톱 (1024px 이상) */
+@media (min-width: 1024px) {
+  .loader-content {
+    padding: 3.5rem 4rem;
+  }
+
+  .premium-spinner {
+    width: 110px;
+    height: 110px;
+  }
+
+  .loading-main-text {
+    font-size: 1.625rem;
+  }
+
+  .loading-sub-text {
+    font-size: 1rem;
+  }
+}
+
+/* ============================================
+   7. ACCESSIBILITY
+   ============================================ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .loading-overlay,
+  .loader-content,
+  .premium-spinner::before,
+  .premium-spinner::after,
+  .inner-ring,
+  .glow-effect,
+  .loading-main-text,
+  .loading-sub-text {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .premium-spinner::before,
+  .premium-spinner::after,
+  .inner-ring {
+    animation: none !important;
+    opacity: 0.5;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .loading-overlay {
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: none;
+  }
+
+  .loader-content {
+    background: white;
+    border: 2px solid #3b82f6;
+  }
+
+  .loading-main-text {
+    color: #000;
+  }
+
+  .loading-sub-text {
+    color: #333;
+  }
+}
+
+/* ============================================
+   8. LOADING DOTS ANIMATION (Optional Enhancement)
+   ============================================ */
+
+/* 텍스트 끝에 점 애니메이션 추가하고 싶다면 */
+.loading-main-text::after {
+  content: '';
+  display: inline-block;
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% {
+    content: '';
+  }
+  40% {
+    content: '.';
+  }
+  60% {
+    content: '..';
+  }
+  80%, 100% {
+    content: '...';
+  }
+}
+
+/* ============================================
+   9. PRINT STYLES
+   ============================================ */
+@media print {
+  .loading-overlay {
+    display: none;
+  }
+}

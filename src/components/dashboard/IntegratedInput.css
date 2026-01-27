@@ -1,0 +1,371 @@
+/* ============================================
+   INTEGRATED INPUT COMPONENT
+   B2B SaaS Premium Style
+   ============================================ */
+
+/* ============================================
+   1. CONTAINER
+   ============================================ */
+.integrated-input-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* ============================================
+   2. FORM LAYOUT
+   ============================================ */
+.integrated-input-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+/* ============================================
+   3. HEADER SECTION
+   ============================================ */
+.input-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.input-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.input-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ============================================
+   4. TEXTAREA - PREMIUM STYLING
+   ============================================ */
+.minutes-textarea {
+  width: 100%;
+  min-height: 180px;
+  padding: 1.25rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: #1e293b;
+  background: #ffffff;
+  resize: vertical;
+  outline: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.minutes-textarea::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+  font-size: 0.9375rem;
+}
+
+/* Focus State */
+.minutes-textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 
+    0 0 0 4px rgba(59, 130, 246, 0.08),
+    0 4px 12px rgba(59, 130, 246, 0.08);
+  background: #ffffff;
+}
+
+/* Hover State */
+.minutes-textarea:hover:not(:focus):not(:disabled) {
+  border-color: #cbd5e1;
+}
+
+/* Disabled State */
+.minutes-textarea:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+  border-color: #f1f5f9;
+}
+
+/* Scrollbar Styling */
+.minutes-textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.minutes-textarea::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.minutes-textarea::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.minutes-textarea::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ============================================
+   5. BUTTON CONTAINER (오른쪽 하단 고정)
+   ============================================ */
+.button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+}
+
+/* ============================================
+   6. ANALYZE BUTTON - PREMIUM DESIGN
+   ============================================ */
+.analyze-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.875rem 2rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Active State (기본) */
+.analyze-button.active {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.25),
+    0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.analyze-button.active:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 
+    0 6px 20px rgba(59, 130, 246, 0.35),
+    0 3px 6px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.analyze-button.active:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 8px rgba(59, 130, 246, 0.2),
+    0 1px 2px rgba(59, 130, 246, 0.1);
+}
+
+/* Disabled State */
+.analyze-button.disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.analyze-button.disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Loading State */
+.analyze-button.loading {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  cursor: wait;
+  box-shadow: 
+    0 4px 12px rgba(59, 130, 246, 0.25),
+    0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Button Icon */
+.button-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+/* Loading Spinner Animation */
+.button-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Button Ripple Effect (Optional) */
+.analyze-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.analyze-button.active:active::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* ============================================
+   7. RESPONSIVE DESIGN
+   ============================================ */
+
+/* 모바일 (767px 이하) */
+@media (max-width: 767px) {
+  .input-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .input-title {
+    font-size: 1.25rem;
+  }
+
+  .input-subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .minutes-textarea {
+    min-height: 150px;
+    padding: 1rem;
+    font-size: 0.875rem;
+  }
+
+  .button-container {
+    justify-content: stretch;
+  }
+
+  .analyze-button {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 0.9375rem;
+  }
+}
+
+/* 태블릿 (768px ~ 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .minutes-textarea {
+    min-height: 160px;
+  }
+
+  .analyze-button {
+    padding: 0.875rem 1.75rem;
+  }
+}
+
+/* 데스크톱 (1024px 이상) */
+@media (min-width: 1024px) {
+  .minutes-textarea {
+    min-height: 200px;
+  }
+
+  .analyze-button {
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+  }
+
+  .button-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+/* ============================================
+   8. ACCESSIBILITY & FOCUS STATES
+   ============================================ */
+.analyze-button:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 2px;
+}
+
+.minutes-textarea:focus-visible {
+  outline: none;
+}
+
+/* ============================================
+   9. UTILITY CLASSES (Tailwind 대체)
+   ============================================ */
+.w-full {
+  width: 100%;
+}
+
+.max-w-4xl {
+  max-width: 56rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.p-6 {
+  padding: 1.5rem;
+}
+
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+/* ============================================
+   10. PRINT STYLES
+   ============================================ */
+@media print {
+  .analyze-button {
+    display: none;
+  }
+
+  .minutes-textarea {
+    border: 1px solid #e2e8f0;
+    box-shadow: none;
+  }
+}
