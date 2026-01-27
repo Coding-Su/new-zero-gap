@@ -1,4 +1,20 @@
-// src/types/index.ts
+
+// 프로젝트 정의
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+  ownerName: string; // 프로젝트 생성자
+}
+
+// 새로운 Opinion 인터페이스 정의
+export interface Opinion {
+  author: string;
+  dept: string;
+  text: string;
+  timestamp: string;
+}
 
 // 1. 회의록 분석 후 각 기능에 쌓일 히스토리 (Why 중심)
 export interface HistoryItem {
@@ -15,6 +31,7 @@ export interface HistoryItem {
 // 2. 메인 화면에 보일 개별 기능(Chip) 정보
 export interface Feature {
   id: string;             // 기능 고유 ID
+  projectId: string;      // 이 기능이 어떤 프로젝트 소속인지 연결하는 고리 (Foreign Key)
   title: string;          // 기능명 (예: 검색, 필터링)
   description: string;    // 기능에 대한 간략한 설명
   currentPolicy: string;  // 현재 확정된 최종 정책 (가장 최신의 What)
@@ -29,10 +46,3 @@ export interface AnalysisResult {
   reason: string;          // 추출된 배경 (Why)
 }
 
-// 새로운 Opinion 인터페이스 정의
-export interface Opinion {
-  author: string;
-  dept: string;
-  text: string;
-  timestamp: string;
-}

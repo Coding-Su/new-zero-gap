@@ -1,80 +1,126 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, User, Search } from 'lucide-react';
+import { LogOut, User, Search, Menu, X } from 'lucide-react';
 import IntegratedInput from '../components/dashboard/IntegratedInput';
 import FeatureCard from '../components/dashboard/FeatureCard';
-import type { Feature, HistoryItem } from '../types';
-import { analyzeMeetingMinutes } from '../api/aiService';
+import Sidebar from '../components/dashboard/Sidebar'; // [추가] 사이드바 컴포넌트
 import LoadingOverlay from '../components/dashboard/LoadingOverlay';
-import { fetchFeaturesFromDB, saveFeatureToDB, deleteFeatureFromDB } from '../services/firebaseService';
+import { 
+  fetchFeaturesByProjectId, // [수정] 프로젝트별 기능 호출
+  saveFeatureToDB, 
+  deleteFeatureFromDB,
+  fetchProjectsFromDB,      // [추가] 프로젝트 목록 호출
+  saveProjectToDB           // [추가] 프로젝트 저장
+} from '../services/firebaseService';
+import { analyzeMeetingMinutes } from '../api/aiService';
+import type { Feature, HistoryItem, Project } from '../types';
 import './MainDashboardPage.css';
 
 const MainDashboardPage = () => {
-  const [features, setFeatures] = useState<Feature[]>([]);
+  // --- [1. 상태 관리] ---
+  const [projects, setProjects] = useState<Project[]>([]); // 프로젝트 목록
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null); // 선택된 프로젝트 ID
+  const [features, setFeatures] = useState<Feature[]>([]); // 선택된 프로젝트의 기능들
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  // 사이드바 열림/닫힘 상태 (모바일 대응용)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const navigate = useNavigate();
 
-  // [추가] 세션 스토리지에서 사용자 정보 가져오기
+  // 사용자 정보 (세션)
   const rawUser = sessionStorage.getItem('zg_user');
   const currentUser = rawUser ? JSON.parse(rawUser) : { name: '익명', dept: '미소속' };
 
-  // 앱 접속 시 DB에서 데이터 불러오기
+  // --- [2. 데이터 로드 로직] ---
+
+  // A. 앱 실행 시 프로젝트 목록부터 가져오기
   useEffect(() => {
-    const initData = async () => {
-      const data = await fetchFeaturesFromDB();
-      if (data.length > 0) setFeatures(data);
+    const initProjects = async () => {
+      const data = await fetchProjectsFromDB();
+      setProjects(data);
+      // 프로젝트가 있다면 첫 번째 프로젝트를 자동으로 선택
+      if (data.length > 0 && !selectedProjectId) {
+        setSelectedProjectId(data[0].id);
+      }
     };
-    initData();
+    initProjects();
   }, []);
 
-  // 검색 로직: 제목이나 상세 정책에 검색어가 포함된 것만 필터링
-  const filteredFeatures = features.filter(f => 
-    f.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    f.currentPolicy.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // B. 선택된 프로젝트가 바뀔 때마다 해당 프로젝트의 기능(Feature)들만 다시 가져오기
+  useEffect(() => {
+    if (selectedProjectId) {
+      const loadProjectFeatures = async () => {
+        const data = await fetchFeaturesByProjectId(selectedProjectId);
+        // 최신 업데이트 순으로 정렬하여 상태 저장
+        setFeatures(data.sort((a, b) => b.histories[0].timestamp.localeCompare(a.histories[0].timestamp)));
+      };
+      loadProjectFeatures();
+    } else {
+      setFeatures([]); // 선택된 프로젝트가 없으면 목록 비움
+    }
+  }, [selectedProjectId]);
 
-  // 로그아웃 처리 함수
+  // 사이드바 열렸을 때 body 스크롤 방지
+  useEffect(() => {
+    if (isSidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSidebarOpen]);
+
+  // 프로젝트 추가 핸들러
+  const handleAddProject = async () => {
+    const name = window.prompt("새 프로젝트 이름을 입력하세요:");
+    if (!name?.trim()) return;
+
+    const newProject: Project = {
+      id: crypto.randomUUID(),
+      name: name,
+      createdAt: new Date().toLocaleString(),
+      ownerName: currentUser.name
+    };
+
+    await saveProjectToDB(newProject);
+    setProjects([...projects, newProject]);
+    setSelectedProjectId(newProject.id); // 생성 후 바로 해당 프로젝트로 이동
+  };
+
+  // 로그아웃
   const handleLogout = () => {
     if (window.confirm("로그아웃 하시겠습니까?")) {
-      sessionStorage.removeItem('zg_user'); // 세션 삭제
-      navigate('/login'); // 로그인 페이지로 이동
+      sessionStorage.removeItem('zg_user');
+      navigate('/login');
     }
   };
 
-  // 삭제 핸들러
+  // 기능 삭제
   const handleDelete = async (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    
     if (!window.confirm("이 분석 결과 카드를 정말 삭제하시겠습니까?")) return;
-
     try {
-      // 1. 삭제 애니메이션 시작
-      const cardElement = (e.target as HTMLElement).closest('.card-hover-wrapper');
-      if (cardElement) {
-        cardElement.classList.add('deleting');
-      }
-
-      // 2. 애니메이션 완료 대기 (300ms)
-      await new Promise(resolve => setTimeout(resolve, 300));
-
-      // 3. DB에서 삭제
       await deleteFeatureFromDB(id);
-
-      // 4. 화면(State)에서 제거
       setFeatures(prev => prev.filter(f => f.id !== id));
     } catch (error) {
       console.error("삭제 실패:", error);
-      alert("삭제 중 오류가 발생했습니다.");
     }
   };
 
+  // 회의록 분석 및 업데이트 (프로젝트 귀속 로직 추가)
   const handleAnalyze = async (minutes: string) => {
+    if (!selectedProjectId) {
+      alert("회의록을 분석할 프로젝트를 먼저 선택하거나 생성해주세요.");
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // 분석 시 현재 프로젝트의 기능들만 참고하도록 전달
       const results = await analyzeMeetingMinutes(minutes, features);
-      
-      // 1. 새로운 상태(updated)를 계산
       let updatedFeatures: Feature[] = [...features];
 
       results.forEach(res => {
@@ -83,43 +129,37 @@ const MainDashboardPage = () => {
           timestamp: new Date().toLocaleString(),
           policyChange: res.policy,
           context: res.reason,
-          // 분석 시에도 현재 로그인한 작성자 정보를 기록
           author: currentUser.name,
           dept: currentUser.dept
         };
           
-          if (res.matchId === 'new') {
-          updatedFeatures.unshift({   // 최신글이 위로 오도록 unshift
+        if (res.matchId === 'new') {
+          updatedFeatures.unshift({
             id: crypto.randomUUID(),
+            projectId: selectedProjectId, // [핵심] 현재 선택된 프로젝트 ID 부여
             title: res.title,
             description: `${res.title} 분석 결과`,
             currentPolicy: res.policy,
             histories: [newHist]
           });
         } else {
-          // [수정] 업데이트된 카드를 찾아 맨 앞으로 이동시킵니다.
-        const targetIndex = updatedFeatures.findIndex(f => f.id === res.matchId);
-        if (targetIndex !== -1) {
-          const targetFeature = { 
-            ...updatedFeatures[targetIndex], 
-            currentPolicy: res.policy, 
-            histories: [newHist, ...updatedFeatures[targetIndex].histories] 
-          };
-          
-          // 기존 위치에서 제거하고 맨 앞에 추가
-          updatedFeatures.splice(targetIndex, 1);
-          updatedFeatures.unshift(targetFeature);   // 업데이트된 항목을 맨 위로
+          const targetIndex = updatedFeatures.findIndex(f => f.id === res.matchId);
+          if (targetIndex !== -1) {
+            const targetFeature = { 
+              ...updatedFeatures[targetIndex], 
+              currentPolicy: res.policy, 
+              histories: [newHist, ...updatedFeatures[targetIndex].histories] 
+            };
+            updatedFeatures.splice(targetIndex, 1);
+            updatedFeatures.unshift(targetFeature); // 업데이트된 항목 맨 위로
+          }
         }
-      }
-  });
+      });
       
-      // 2. 계산된 결과를 Firebase DB에 하나씩 저장
       for (const feature of updatedFeatures) {
         await saveFeatureToDB(feature);
       }
-      // 3. 화면(State)을 업데이트
       setFeatures(updatedFeatures);
-
     } catch (error) {
       console.error("분석 실패:", error);
     } finally {
@@ -127,87 +167,120 @@ const MainDashboardPage = () => {
     }
   };
 
+  // 실시간 검색 필터링
+  const filteredFeatures = features.filter(f => 
+    f.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.currentPolicy.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <div className="dashboard-root">
-      {isLoading && <LoadingOverlay />}
-      
-      <div className="dashboard-inner">
-        {/* 헤더 부분에 사용자 정보와 로그아웃 버튼 배치 */}
-        <header className="dashboard-header">
-          <div className="header-left">
-            <h1 className="dashboard-title">
-              ZERO-GAP<span className="dot">.</span>
-            </h1>
-          </div>
+    <div className="dashboard-layout">
+      {/* ⭐ 햄버거 메뉴 버튼 */}
+      <button 
+        className={`sidebar-toggle-btn ${isSidebarOpen ? 'active' : ''}`}
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        aria-label="메뉴"
+      >
+        {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
 
-          <div className="header-right">
-            <div className="user-greeting">
-              <User size={16} className="user-icon" />
-              <span className="user-text">
-                <strong>{currentUser.name}</strong> {currentUser.dept}
-              </span>
+      {/* ⭐ 오버레이 */}
+      <div 
+        className={`sidebar-overlay ${isSidebarOpen ? 'active' : ''}`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
+
+      {/* 왼쪽 사이드바 영역 */}
+      <Sidebar 
+        isOpen={isSidebarOpen}
+        projects={projects}
+        selectedProjectId={selectedProjectId}
+        onSelectProject={(id) => {
+          setSelectedProjectId(id);
+          setIsSidebarOpen(false); // 프로젝트 선택 시 사이드바 닫기
+        }}
+        onAddProject={handleAddProject}
+      />
+
+      <div className="dashboard-root">
+        {isLoading && <LoadingOverlay />}
+        
+        <div className="dashboard-inner">
+          <header className="dashboard-header">
+            <div className="header-left">
+              
+              {/* 현재 어떤 프로젝트를 보고 있는지 표시 */}
+              <h1 className="dashboard-title">
+                {projects.find(p => p.id === selectedProjectId)?.name || "Project"}
+                <span className="dot">.</span>
+              </h1>
             </div>
-            <button onClick={handleLogout} className="logout-button" title="로그아웃">
-              <LogOut size={18} />
-              <span>나가기</span>
-            </button>
-          </div>
-        </header>
-
-        <section className="input-section-card">
-          <IntegratedInput onAnalyze={handleAnalyze} isLoading={isLoading} />
-        </section>
-
-        <section className="features-section">
-          <div className="section-header">
-            <h2 className="features-title">
-              Analyzed Features
-              {/* {features.length > 0 && (
-                <span className="features-count-badge">{features.length}</span>
-              )} */}
-            </h2>
             
-            {/* [신규] 실시간 검색바 UI */}
-            <div className="search-bar-container">
-              <Search className="search-icon" size={18} />
-              <input 
-                type="text" 
-                className="search-input"
-                placeholder="기능 명칭 또는 정책 내용 검색..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="header-right">
+              <div className="user-greeting">
+                <User size={16} className="user-icon" />
+                <span className="user-text">
+                  <strong>{currentUser.name}</strong> {currentUser.dept}
+                </span>
+              </div>
+              <button onClick={handleLogout} className="logout-button" title="로그아웃">
+                <LogOut size={18} />
+              </button>
             </div>
-          </div>
+          </header>
 
-          {features.length === 0 ? (
-            <div className="empty-state-box">
-              <p className="empty-state-title">분석된 데이터가 없습니다.</p>
+          <section className="input-section-card">
+            <IntegratedInput onAnalyze={handleAnalyze} isLoading={isLoading} />
+          </section>
+
+          <section className="features-section">
+            <div className="section-header">
+              <h2 className="features-title">
+                Features
+                {filteredFeatures.length > 0 && (
+                  <span className="features-count-badge">{filteredFeatures.length}</span>
+                )}
+              </h2>
+
+              <div className="search-bar-container">
+                <Search className="search-icon" size={18} />
+                <input 
+                  type="text" 
+                  className="search-input"
+                  placeholder="기능명 또는 정책 검색..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
             </div>
-          ) : (
-            <div className="zg-feature-grid">
-              {filteredFeatures.map(f => (
-                <div 
-                  key={f.id} 
-                  onClick={() => navigate(`/detail/${f.id}`, { state: { feature: f } })}
-                  className="card-hover-wrapper"
-                  style={{ position: 'relative' }} // 버튼 위치를 위해 추가
-                >
-                  <FeatureCard feature={f} />
-                  
-                  {/* 삭제 버튼 */}
-                  <button 
-                    className="feature-delete-btn"
-                    onClick={(e) => handleDelete(e, f.id)}
-                    title="카드 삭제"
+
+            {filteredFeatures.length === 0 ? (
+              <div className="empty-state-box">
+                <p className="empty-state-title">
+                  {searchQuery ? `'${searchQuery}' 결과 없음` : "분석된 기획서가 없습니다."}
+                </p>
+              </div>
+            ) : (
+              <div className="zg-feature-grid">
+                {filteredFeatures.map(f => (
+                  <div 
+                    key={f.id} 
+                    onClick={() => navigate(`/detail/${f.id}`, { state: { feature: f } })}
+                    className="card-hover-wrapper"
                   >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+                    <FeatureCard feature={f} />
+                    <button 
+                      className="feature-delete-btn"
+                      onClick={(e) => handleDelete(e, f.id)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );
