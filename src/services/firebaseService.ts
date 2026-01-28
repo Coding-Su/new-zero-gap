@@ -10,10 +10,11 @@ import {
   where,
   writeBatch // [추가] 대량 삭제를 위한 배치 처리
 } from "firebase/firestore";
-import type { Feature, Project } from "../types";
+import type { Feature, Project, MeetingLog } from "../types";
 
 const FEATURES_COL = "features";
 const PROJECTS_COL = "projects";
+const LOGS_COL = "meeting_logs";
 
 /**
  * ==========================================
@@ -42,32 +43,58 @@ export const saveProjectToDB = async (project: Project) => {
  */
 export const deleteProjectFromDB = async (projectId: string): Promise<void> => {
   try {
-    // 1. 해당 프로젝트에 속한 모든 기능(Feature)들을 먼저 찾습니다.
-    const q = query(collection(db, FEATURES_COL), where("projectId", "==", projectId));
-    const querySnapshot = await getDocs(q);
-    
-    // 2. Firestore의 Batch 기능을 사용하여 한 번에 삭제 처리합니다. (성능 및 안정성)
     const batch = writeBatch(db);
-    
-    // 해당 프로젝트 소속 Feature들을 삭제 큐에 추가
-    querySnapshot.docs.forEach((featureDoc) => {
-      batch.delete(featureDoc.ref);
-    });
 
-    // 3. 마지막으로 프로젝트 자체를 삭제 큐에 추가
+    // 1. Feature 삭제 준비 (변수 이름을 featuresSnap으로 통일)
+    const featuresQ = query(collection(db, FEATURES_COL), where("projectId", "==", projectId));
+    const featuresSnap = await getDocs(featuresQ);
+    featuresSnap.docs.forEach((d) => batch.delete(d.ref));
+    
+    // 2. MeetingLog 삭제 준비 (변수 이름을 logsSnap으로 통일)
+    const logsQ = query(collection(db, LOGS_COL), where("projectId", "==", projectId));
+    const logsSnap = await getDocs(logsQ);
+    logsSnap.docs.forEach((d) => batch.delete(d.ref)); 
+
+    // 3. 프로젝트 삭제 준비
     const projectRef = doc(db, PROJECTS_COL, projectId);
     batch.delete(projectRef);
 
-    // 4. 모든 삭제 작업을 한꺼번에 실행
+    // 4. 한 번에 실행
     await batch.commit();
     
-    console.log(`프로젝트 ${projectId}와 관련된 모든 기능이 삭제되었습니다.`);
+    console.log(`✅ 프로젝트(${projectId}) 청소 완료`);
   } catch (error) {
-    console.error("프로젝트 및 하위 데이터 삭제 중 오류 발생:", error);
+    console.error("삭제 중 오류:", error);
     throw error;
   }
 };
 
+/**
+ * ==========================================
+ * [신규] 회의록(Meeting Log) 관련 서비스 함수
+ * ==========================================
+ */
+
+/**
+ * 1. 회의록 원문 저장하기
+ */
+export const saveMeetingLogToDB = async (log: MeetingLog) => {
+  try {
+    await setDoc(doc(db, LOGS_COL, log.id), log);
+  } catch (error) {
+    console.error("회의록 저장 중 오류 발생:", error);
+    throw error;
+  }
+};
+
+/**
+ * 2. 특정 프로젝트의 회의록 히스토리 가져오기
+ */
+export const fetchMeetingLogsByProjectId = async (projectId: string): Promise<MeetingLog[]> => {
+  const q = query(collection(db, LOGS_COL), where("projectId", "==", projectId));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MeetingLog));
+};
 
 /**
  * ==========================================
@@ -137,5 +164,29 @@ export const updateFeatureOpinions = async (featureId: string, updatedHistories:
   } catch (error) {
     console.error("기획 의도 업데이트 중 오류 발생:", error);
     throw error;
+  }
+};
+
+/**
+ * 특정 기능(Feature)과 연결된 회의록 원문 가져오기 (역추적)
+ * Firestore의 array-contains 쿼리를 사용하여 해당 ID가 포함된 로그를 찾습니다.
+ */
+export const fetchMeetingLogByFeatureId = async (featureId: string): Promise<MeetingLog | null> => {
+  try {
+    const q = query(
+      collection(db, LOGS_COL), 
+      where("derivedFeatureIds", "array-contains", featureId)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const logs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MeetingLog));
+      // 생성일(createdAt) 기준 내림차순 정렬 후 가장 최근 것 반환
+      return logs.sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+    }
+    return null;
+  } catch (error) {
+    console.error("회의록 역추적 중 오류:", error);
+    return null;
   }
 };

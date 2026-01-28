@@ -1,7 +1,7 @@
 /* ============================================
    MAIN DASHBOARD PAGE - ZERO-GAP
-   B2B SaaS Premium Style | Project Mode with Sidebar
-   Updated: Mobile Hamburger Menu Support
+   B2B SaaS Premium Style | 2-Step Review Wizard
+   Updated: Staging Modals for Minutes & Features Review
    ============================================ */
 
 /* ============================================
@@ -14,7 +14,7 @@
 }
 
 /* ============================================
-   1. LAYOUT CONTAINER (Sidebar + Main)
+   1. LAYOUT CONTAINER
    ============================================ */
 .dashboard-layout {
   display: flex;
@@ -24,73 +24,38 @@
 }
 
 /* ============================================
-   1-1. 햄버거 메뉴 버튼
+   2. SIDEBAR TOGGLE BUTTON
    ============================================ */
 .sidebar-toggle-btn {
   display: none;
-  position: fixed;
-  top: 1.25rem;
-  left: 1.25rem;
-  z-index: 1001;
+  align-items: center;
+  justify-content: center;
   width: 2.75rem;
   height: 2.75rem;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
   cursor: pointer;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
   color: #1e3a5f;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   padding: 0;
 }
 
 .sidebar-toggle-btn:hover {
   background: #f8fafc;
   border-color: #cbd5e1;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   transform: scale(1.05);
 }
 
-.sidebar-toggle-btn:active {
-  transform: scale(0.95);
-}
-
-.sidebar-toggle-btn.active {
-  background: #1e3a5f;
-  color: white;
-  border-color: #2d5a8a;
-}
-
-.sidebar-toggle-btn:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+@media (max-width: 767px) {
+  .sidebar-toggle-btn {
+    display: flex;
+  }
 }
 
 /* ============================================
-   1-2. 오버레이 (모바일용)
-   ============================================ */
-.sidebar-overlay {
-  display: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 999;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.sidebar-overlay.active {
-  display: block;
-  opacity: 1;
-}
-
-/* ============================================
-   2. ROOT & MAIN CONTENT AREA
+   3. MAIN CONTENT AREA
    ============================================ */
 .dashboard-root {
   flex: 1;
@@ -109,7 +74,7 @@
 }
 
 /* ============================================
-   3. HEADER SECTION
+   4. HEADER
    ============================================ */
 .dashboard-header {
   display: flex;
@@ -150,9 +115,6 @@
   gap: 1rem;
 }
 
-/* ============================================
-   3-1. USER GREETING
-   ============================================ */
 .user-greeting {
   display: flex;
   align-items: center;
@@ -170,31 +132,23 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
-.user-icon {
-  color: #3b82f6;
-  flex-shrink: 0;
-}
-
-.user-text {
+.user-greeting span {
   font-size: 0.875rem;
   color: #64748b;
   font-weight: 500;
-  white-space: nowrap;
 }
 
-.user-text strong {
+.user-greeting strong {
   color: #1e293b;
   font-weight: 700;
 }
 
-/* ============================================
-   3-2. LOGOUT BUTTON
-   ============================================ */
 .logout-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.625rem;
+  width: 2.5rem;
+  height: 2.5rem;
   background: white;
   color: #64748b;
   border: 1px solid #e2e8f0;
@@ -202,29 +156,18 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  width: 2.5rem;
-  height: 2.5rem;
+  padding: 0;
 }
 
 .logout-button:hover {
   background: #fef2f2;
   color: #dc2626;
   border-color: #fecaca;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.1);
   transform: translateY(-1px);
 }
 
-.logout-button:active {
-  transform: translateY(0);
-}
-
-.logout-button:focus-visible {
-  outline: 2px solid #fca5a5;
-  outline-offset: 2px;
-}
-
 /* ============================================
-   4. INPUT SECTION CARD
+   5. INPUT SECTION
    ============================================ */
 .input-section-card {
   background: white;
@@ -233,11 +176,47 @@
   box-shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
   border: 1px solid #e2e8f0;
   animation: fadeInUp 0.6s ease-out 0.1s both;
-  overflow: hidden;
 }
 
 /* ============================================
-   5. FEATURES SECTION
+   6. TAB NAVIGATION
+   ============================================ */
+.zg-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 1.5rem;
+}
+
+.zg-tab-item {
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #64748b;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.zg-tab-item:hover {
+  color: #1e293b;
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.zg-tab-item.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* ============================================
+   7. FEATURES SECTION
    ============================================ */
 .features-section {
   animation: fadeInUp 0.6s ease-out 0.2s both;
@@ -246,8 +225,10 @@
 .section-header {
   margin-bottom: 1.5rem;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .features-title {
@@ -260,7 +241,7 @@
   gap: 0.75rem;
 }
 
-.features-count-badge {
+.features-title .count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -273,18 +254,14 @@
   font-weight: 700;
   border-radius: 9999px;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-  animation: scaleIn 0.3s ease-out;
 }
 
-/* ============================================
-   5-1. SEARCH BAR
-   ============================================ */
 .search-bar-container {
   position: relative;
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 500px;
+  max-width: 400px;
 }
 
 .search-icon {
@@ -292,7 +269,6 @@
   left: 1rem;
   color: #94a3b8;
   pointer-events: none;
-  transition: color 0.2s ease;
   z-index: 1;
 }
 
@@ -306,71 +282,21 @@
   color: #1e293b;
   outline: none;
   transition: all 0.2s ease;
-  font-family: inherit;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-}
-
-.search-input::placeholder {
-  color: #94a3b8;
-  font-weight: 400;
 }
 
 .search-input:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-  background: #ffffff;
-}
-
-.search-bar-container:focus-within .search-icon {
-  color: #3b82f6;
-}
-
-.search-input:hover:not(:focus) {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
 /* ============================================
-   6. EMPTY STATE
-   ============================================ */
-.empty-state-box {
-  background: linear-gradient(135deg, #1e3a5f 0%, #2d5a8a 100%);
-  border-radius: 1.5rem;
-  padding: 3rem 2rem;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(30, 58, 95, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.empty-state-box::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-  animation: emptyStatePulse 4s ease-in-out infinite;
-}
-
-.empty-state-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: white;
-  margin: 0;
-  position: relative;
-  z-index: 1;
-}
-
-/* ============================================
-   7. FEATURE GRID
+   8. FEATURE GRID
    ============================================ */
 .zg-feature-grid {
   display: grid;
   gap: 1.5rem;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 }
 
 .card-hover-wrapper {
@@ -384,18 +310,6 @@
   transform: translateY(-4px);
 }
 
-.card-hover-wrapper:active {
-  transform: translateY(-2px);
-}
-
-.card-hover-wrapper:focus-visible {
-  outline: 3px solid #93c5fd;
-  outline-offset: 4px;
-}
-
-/* ============================================
-   7-1. FEATURE DELETE BUTTON
-   ============================================ */
 .feature-delete-btn {
   position: absolute;
   top: 0.75rem;
@@ -432,258 +346,333 @@
   transform: scale(1.1) rotate(90deg);
 }
 
-.feature-delete-btn:active {
-  transform: scale(0.95) rotate(90deg);
+/* ============================================
+   9. MEETING HISTORY LIST
+   ============================================ */
+.zg-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.feature-delete-btn:focus-visible {
-  outline: 3px solid #fca5a5;
-  outline-offset: 2px;
-  opacity: 1;
-  transform: scale(1);
+.history-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.history-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.15);
+  transform: translateX(4px);
+}
+
+.history-card-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-date {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.log-preview {
+  font-size: 0.9375rem;
+  color: #1e293b;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.5;
 }
 
 /* ============================================
-   8. RESPONSIVE BREAKPOINTS
+   10. MODAL BASE
+   ============================================ */
+.zg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.zg-modal-content {
+  background: white;
+  border-radius: 1.5rem;
+  width: 100%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+.zg-modal-content.large {
+  max-width: 900px;
+  max-height: 85vh;
+}
+
+.zg-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.zg-modal-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.zg-modal-header button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.zg-modal-header button:hover {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.zg-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.zg-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+/* ============================================
+   11. REVIEW WIZARD MODALS (신규)
    ============================================ */
 
-/* 모바일 (767px 이하) */
-@media (max-width: 767px) {
-  .sidebar-toggle-btn {
-    display: flex;
-  }
-
-  .dashboard-root {
-    padding: 1rem;
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .dashboard-inner {
-    gap: 1.5rem;
-  }
-
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1rem;
-    padding-left: 4.5rem;
-    gap: 1rem;
-  }
-
-  .header-left {
-    width: 100%;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-  }
-
-  .dashboard-title .dot {
-    font-size: 2rem;
-  }
-
-  .header-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .user-greeting {
-    flex: 1;
-    padding: 0.5rem 0.875rem;
-  }
-
-  .user-text {
-    font-size: 0.8125rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .input-section-card {
-    padding: 1.5rem;
-  }
-
-  .section-header {
-    gap: 0.875rem;
-  }
-
-  .features-title {
-    font-size: 1.25rem;
-  }
-
-  .search-bar-container {
-    max-width: 100%;
-  }
-
-  .search-input {
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
-    font-size: 0.875rem;
-  }
-
-  .search-icon {
-    left: 0.875rem;
-    width: 16px;
-    height: 16px;
-  }
-
-  .empty-state-box {
-    padding: 2.5rem 1.5rem;
-  }
-
-  .empty-state-title {
-    font-size: 1.125rem;
-  }
-
-  .zg-feature-grid {
-    gap: 1.25rem;
-  }
-
-  .feature-delete-btn {
-    opacity: 1;
-    transform: scale(1);
-    width: 1.75rem;
-    height: 1.75rem;
-    font-size: 1.25rem;
-    top: 0.625rem;
-    right: 0.625rem;
-  }
+/* 1단계: 회의록 정제본 검수 */
+.modal-guide {
+  font-size: 0.9375rem;
+  color: #64748b;
+  margin: 0 0 1rem 0;
+  line-height: 1.6;
 }
 
-/* 태블릿 (768px ~ 1023px) */
-@media (min-width: 768px) and (max-width: 1023px) {
-  .dashboard-root {
-    padding: 2rem;
-  }
-
-  .dashboard-inner {
-    gap: 2rem;
-  }
-
-  .dashboard-header {
-    padding: 1.5rem 1rem;
-  }
-
-  .dashboard-title {
-    font-size: 1.75rem;
-  }
-
-  .dashboard-title .dot {
-    font-size: 2.25rem;
-  }
-
-  .input-section-card {
-    padding: 2rem;
-  }
-
-  .section-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .features-title {
-    font-size: 1.5rem;
-  }
-
-  .search-bar-container {
-    max-width: 400px;
-  }
-
-  .empty-state-box {
-    padding: 3.5rem 2.5rem;
-  }
-
-  .zg-feature-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1.75rem;
-  }
-
-  .feature-delete-btn {
-    width: 1.875rem;
-    height: 1.875rem;
-    font-size: 1.375rem;
-  }
+.staged-textarea {
+  width: 100%;
+  min-height: 400px;
+  padding: 1.25rem;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.7;
+  color: #1e293b;
+  resize: vertical;
+  transition: all 0.2s ease;
 }
 
-/* 데스크톱 (1024px 이상) */
-@media (min-width: 1024px) {
-  .dashboard-root {
-    padding: 2.5rem;
-  }
-
-  .dashboard-inner {
-    gap: 2.5rem;
-  }
-
-  .dashboard-header {
-    padding: 2rem 1rem;
-  }
-
-  .dashboard-title {
-    font-size: 2rem;
-  }
-
-  .dashboard-title .dot {
-    font-size: 2.5rem;
-  }
-
-  .user-greeting {
-    padding: 0.75rem 1.25rem;
-  }
-
-  .user-text {
-    font-size: 0.9375rem;
-  }
-
-  .input-section-card {
-    padding: 2.25rem;
-  }
-
-  .section-header {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .features-title {
-    font-size: 2rem;
-  }
-
-  .search-bar-container {
-    max-width: 500px;
-  }
-
-  .search-input {
-    padding: 1rem 1.25rem 1rem 3.25rem;
-    font-size: 1rem;
-  }
-
-  .search-icon {
-    left: 1.125rem;
-    width: 20px;
-    height: 20px;
-  }
-
-  .zg-feature-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.75rem;
-  }
+.staged-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-/* 대형 데스크톱 (1440px 이상) */
-@media (min-width: 1440px) {
-  .dashboard-inner {
-    max-width: 1600px;
-    margin: 0 auto;
-  }
+/* 2단계: 기능 카드 검수 */
+.staged-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
 
-  .zg-feature-grid {
-    gap: 2rem;
-  }
+.staged-feature-item {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.staged-feature-item:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.875rem;
+}
+
+.sf-header input {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  transition: all 0.2s ease;
+}
+
+.sf-header input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.sf-header button {
+  padding: 0.5rem 1rem;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sf-header button:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  transform: translateY(-1px);
+}
+
+.staged-feature-item textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 1rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  line-height: 1.6;
+  color: #1e293b;
+  resize: vertical;
+  transition: all 0.2s ease;
+}
+
+.staged-feature-item textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* 모달 버튼 스타일 */
+.primary-btn,
+.secondary-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.secondary-btn {
+  background: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.secondary-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
 }
 
 /* ============================================
-   9. ANIMATIONS
+   12. ARCHIVE MODAL (기존)
+   ============================================ */
+.log-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.raw-content-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: #1e293b;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ============================================
+   13. ANIMATIONS
    ============================================ */
 @keyframes fadeInDown {
   from {
@@ -707,44 +696,204 @@
   }
 }
 
-@keyframes scaleIn {
+@keyframes fadeIn {
   from {
     opacity: 0;
-    transform: scale(0.8);
   }
   to {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-@keyframes emptyStatePulse {
-  0%, 100% {
-    opacity: 1;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
   }
-  50% {
-    opacity: 0.5;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 /* ============================================
-   10. ACCESSIBILITY & FOCUS STATES
+   14. RESPONSIVE DESIGN
    ============================================ */
-.card-hover-wrapper:focus {
-  outline: none;
+
+/* 모바일 (767px 이하) */
+@media (max-width: 767px) {
+  .dashboard-root {
+    padding: 1rem;
+  }
+
+  .dashboard-inner {
+    gap: 1.5rem;
+  }
+
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .header-left {
+    width: 100%;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .user-greeting {
+    flex: 1;
+    padding: 0.5rem 0.875rem;
+  }
+
+  .input-section-card {
+    padding: 1.5rem;
+  }
+
+  .zg-tabs {
+    gap: 0.25rem;
+  }
+
+  .zg-tab-item {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-bar-container {
+    max-width: 100%;
+  }
+
+  .zg-feature-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .feature-delete-btn {
+    opacity: 1;
+    transform: scale(1);
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 1.25rem;
+  }
+
+  .history-card {
+    padding: 1.25rem;
+  }
+
+  .zg-modal-content {
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: 1rem;
+  }
+
+  .zg-modal-content.large {
+    max-width: 100%;
+  }
+
+  .zg-modal-header {
+    padding: 1.25rem;
+  }
+
+  .zg-modal-header h3 {
+    font-size: 1.125rem;
+  }
+
+  .zg-modal-body {
+    padding: 1.25rem;
+  }
+
+  .zg-modal-footer {
+    flex-direction: column;
+    padding: 1rem 1.25rem;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .staged-textarea {
+    min-height: 300px;
+  }
+
+  .sf-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sf-header button {
+    width: 100%;
+  }
 }
 
-.logout-button:focus-visible {
-  outline: 2px solid #fca5a5;
+/* 태블릿 (768px ~ 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dashboard-root {
+    padding: 2rem;
+  }
+
+  .zg-feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 데스크톱 (1024px 이상) */
+@media (min-width: 1024px) {
+  .dashboard-root {
+    padding: 2.5rem;
+  }
+
+  .dashboard-inner {
+    gap: 2.5rem;
+  }
+
+  .zg-feature-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 대형 데스크톱 (1440px 이상) */
+@media (min-width: 1440px) {
+  .dashboard-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .zg-feature-grid {
+    gap: 2rem;
+  }
+}
+
+/* ============================================
+   15. ACCESSIBILITY
+   ============================================ */
+.zg-tab-item:focus-visible,
+.history-card:focus-visible,
+.sidebar-toggle-btn:focus-visible,
+.logout-button:focus-visible,
+.primary-btn:focus-visible,
+.secondary-btn:focus-visible {
+  outline: 2px solid #3b82f6;
   outline-offset: 2px;
 }
 
-.search-input:focus-visible {
-  outline: none;
-}
-
 /* ============================================
-   11. REDUCED MOTION SUPPORT
+   16. REDUCED MOTION SUPPORT
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -755,46 +904,22 @@
     transition-duration: 0.01ms !important;
   }
 
-  .logout-button:hover,
-  .card-hover-wrapper:hover {
+  .card-hover-wrapper:hover,
+  .history-card:hover {
     transform: none;
-  }
-
-  .feature-delete-btn:hover {
-    transform: scale(1);
   }
 }
 
 /* ============================================
-   12. PRINT STYLES
+   17. PRINT STYLES
    ============================================ */
 @media print {
-  .dashboard-root {
-    background: white;
-    padding: 0;
-  }
-
+  .sidebar-toggle-btn,
   .logout-button,
+  .zg-tabs,
+  .search-bar-container,
   .feature-delete-btn,
-  .sidebar-toggle-btn {
+  .zg-modal-overlay {
     display: none;
-  }
-
-  .sidebar-overlay {
-    display: none;
-  }
-
-  .input-section-card {
-    display: none;
-  }
-
-  .card-hover-wrapper {
-    break-inside: avoid;
-  }
-
-  .empty-state-box {
-    border: 1px solid #e2e8f0;
-    background: white;
-    color: black;
   }
 }

@@ -46,3 +46,12 @@ export interface AnalysisResult {
   reason: string;          // 추출된 배경 (Why)
 }
 
+// MeetingLog 타입 추가
+export interface MeetingLog {
+  id: string;
+  projectId: string;      // 어떤 프로젝트의 회의인지
+  rawContent: string;     // 사용자가 입력한 날것의 회의록
+  author?: string;        // 작성자
+  createdAt: string;      // 회의 일시
+  derivedFeatureIds: string[]; // 이 회의를 통해 만들어진 기능 카드들의 ID 리스트 (연결 고리)
+}
