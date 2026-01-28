@@ -23,7 +23,7 @@ import {
   fetchMeetingLogsByProjectId
 } from '../services/firebaseService';
 import { refineMeetingMinutes, analyzeMeetingMinutes } from '../api/aiService';
-import { calculateSimilarity } from '../utils'; // [Step 1, 2 함수]
+import { calculateSimilarity, formatDate } from '../utils'; // [Step 1, 2 함수]
 
 // 타입 임포트
 import type { Feature, HistoryItem, Project, MeetingLog, AnalysisResult } from '../types';
@@ -139,6 +139,10 @@ const MainDashboardPage = () => {
       let updatedFeatures: Feature[] = [...features];
       const affectedIds: string[] = [];
 
+      const meetingLogId = crypto.randomUUID(); // [Step 3 수정] 미리 ID 생성
+
+
+
       stagedFeatures.forEach(res => {
         // 1. AI가 준 ID가 실제 우리 리스트에 있는지 확인 (매우 중요)
         const targetIndex = updatedFeatures.findIndex(f => f.id === res.matchId);
@@ -154,7 +158,8 @@ const MainDashboardPage = () => {
           policyChange: res.policy || "",
           context: res.reason || "회의 내용 참조",
           author: currentUser.name || "익명",
-          dept: currentUser.dept || "미소속"
+          dept: currentUser.dept || "미소속",
+          meetingLogId: meetingLogId // [추가] 로그 ID 연결
         };
 
         if (!isExisting) {
@@ -181,7 +186,7 @@ const MainDashboardPage = () => {
 
       // 3. DB 저장 로직 (MeetingLog 포함)
       const finalMeetingLog: MeetingLog = {
-        id: crypto.randomUUID(),
+        id: meetingLogId, // [수정] 위에서 생성한 ID 사용
         projectId: selectedProjectId!,
         rawContent: stagedMinutes || "",
         author: currentUser.name || "익명",
@@ -308,7 +313,7 @@ const MainDashboardPage = () => {
                 {meetingLogs.map(log => (
                   <div key={log.id} className="history-card" onClick={() => setSelectedLog(log)}>
                     <div className="history-card-left">
-                      <div className="log-date"><Clock size={14} /> {log.createdAt}</div>
+                      <div className="log-date"><Clock size={14} /> {formatDate(log.createdAt)}</div>
                       <p className="log-preview">{log.rawContent}</p>
                     </div>
                     <ChevronRight size={18} />
@@ -423,7 +428,7 @@ const MainDashboardPage = () => {
           <div className="zg-modal-content" onClick={e => e.stopPropagation()}>
             <div className="zg-modal-header"><h3>회의록 원문 아카이브</h3><button onClick={() => setSelectedLog(null)}><X size={20} /></button></div>
             <div className="zg-modal-body">
-              <div className="log-meta"><span>📅 {selectedLog.createdAt}</span><span>👤 {selectedLog.author}</span></div>
+              <div className="log-meta"><span>📅 {formatDate(selectedLog.createdAt)}</span><span>👤 {selectedLog.author}</span></div>
               <div className="raw-content-box">{selectedLog.rawContent}</div>
             </div>
           </div>

@@ -25,6 +25,7 @@ export interface HistoryItem {
   isFinalized?: boolean; // 해당 버전의 확정 여부
   author?: string;
   dept?: string;
+  meetingLogId?: string; // [추가] 해당 히스토리가 생성된 회의록 ID 역추적용
   opinions?: (string | Opinion)[];  // 사용자의 추가 의견
 }
 

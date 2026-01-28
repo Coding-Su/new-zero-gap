@@ -1,9 +1,9 @@
 import { db } from "../firebase";
-import { 
-  collection, 
-  getDocs, 
-  getDoc, 
-  setDoc, 
+import {
+  collection,
+  getDocs,
+  getDoc,
+  setDoc,
   doc,
   deleteDoc,
   query,
@@ -49,11 +49,11 @@ export const deleteProjectFromDB = async (projectId: string): Promise<void> => {
     const featuresQ = query(collection(db, FEATURES_COL), where("projectId", "==", projectId));
     const featuresSnap = await getDocs(featuresQ);
     featuresSnap.docs.forEach((d) => batch.delete(d.ref));
-    
+
     // 2. MeetingLog 삭제 준비 (변수 이름을 logsSnap으로 통일)
     const logsQ = query(collection(db, LOGS_COL), where("projectId", "==", projectId));
     const logsSnap = await getDocs(logsQ);
-    logsSnap.docs.forEach((d) => batch.delete(d.ref)); 
+    logsSnap.docs.forEach((d) => batch.delete(d.ref));
 
     // 3. 프로젝트 삭제 준비
     const projectRef = doc(db, PROJECTS_COL, projectId);
@@ -61,7 +61,7 @@ export const deleteProjectFromDB = async (projectId: string): Promise<void> => {
 
     // 4. 한 번에 실행
     await batch.commit();
-    
+
     console.log(`✅ 프로젝트(${projectId}) 청소 완료`);
   } catch (error) {
     console.error("삭제 중 오류:", error);
@@ -174,11 +174,11 @@ export const updateFeatureOpinions = async (featureId: string, updatedHistories:
 export const fetchMeetingLogByFeatureId = async (featureId: string): Promise<MeetingLog | null> => {
   try {
     const q = query(
-      collection(db, LOGS_COL), 
+      collection(db, LOGS_COL),
       where("derivedFeatureIds", "array-contains", featureId)
     );
     const querySnapshot = await getDocs(q);
-    
+
     if (!querySnapshot.empty) {
       const logs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MeetingLog));
       // 생성일(createdAt) 기준 내림차순 정렬 후 가장 최근 것 반환
@@ -188,5 +188,39 @@ export const fetchMeetingLogByFeatureId = async (featureId: string): Promise<Mee
   } catch (error) {
     console.error("회의록 역추적 중 오류:", error);
     return null;
+  }
+};
+/**
+ * ID로 특정 회의록 원문 가져오기 (버전별 역추적용)
+ */
+export const fetchMeetingLogById = async (logId: string): Promise<MeetingLog | null> => {
+  try {
+    const docRef = doc(db, LOGS_COL, logId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      return { id: docSnap.id, ...docSnap.data() } as MeetingLog;
+    }
+    return null;
+  } catch (error) {
+    console.error("회의록(ID) 가져오기 실패:", error);
+    return null;
+  }
+};
+
+/**
+ * 특정 기능(Feature)과 연결된 *모든* 회의록 원문 가져오기
+ * (Legacy 데이터 및 타임스탬프 매칭용)
+ */
+export const fetchMeetingLogsListByFeatureId = async (featureId: string): Promise<MeetingLog[]> => {
+  try {
+    const q = query(
+      collection(db, LOGS_COL),
+      where("derivedFeatureIds", "array-contains", featureId)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MeetingLog));
+  } catch (error) {
+    console.error("회의록 리스트 역추적 중 오류:", error);
+    return [];
   }
 };
