@@ -1,4 +1,40 @@
-// src/api/aiService.ts
+// src/api/aiService.ts (시연용 Mock 버전)
+// import type { Feature, AnalysisResult } from '../types';
+
+// export const analyzeMeetingMinutes = async (
+//   _minutes: string,
+//   existingFeatures: Feature[]
+// ): Promise<AnalysisResult[]> => {
+  
+//   console.log("📑 공식 회의록 구조화 분석 가동 중...");
+  
+//   // 시연의 현장감을 위해 1.5초 대기
+//   await new Promise(resolve => setTimeout(resolve, 1500));
+
+//   return [
+//     {
+//       // 기존 기능 중 '검색'이 포함된 카드가 있다면 업데이트로 처리
+//       matchId: existingFeatures.find(f => f.title.includes('검색'))?.id || 'search-id-001',
+//       title: "검색 필터 고도화",
+//       policy: "기존 키워드 검색에 '작성자' 및 '날짜 범위' 필터링 옵션 추가",
+//       reason: "데이터 누적에 따른 정보 탐색 효율성 제고 및 사용자 맞춤형 검색 환경 구축"
+//     },
+//     {
+//       matchId: 'new',
+//       title: "실시간 의사결정 투표",
+//       policy: "안건별 찬반 투표 모듈 구현 및 의사결정 이력 자동 아카이빙",
+//       reason: "의사결정 지연 방지 및 정책 결정 근거의 데이터 자산화"
+//     },
+//     {
+//       matchId: 'new',
+//       title: "Slack 자동 공유 연동",
+//       policy: "분석 완료 데이터의 지정 슬랙 채널 자동 푸시 알림 기능",
+//       reason: "수동 공유 리소스 절감 및 팀 내 정보 동기화 프로세스 자동화"
+//     }
+//   ];
+// };
+
+// 기존코드
 import type { Feature, AnalysisResult } from '../types';
 
 const API_CONFIG = {
@@ -12,13 +48,19 @@ export const analyzeMeetingMinutes = async (
   existingFeatures: Feature[]
 ): Promise<AnalysisResult[]> => {
   
-  // 1. 기존 기능 리스트를 텍스트로 변환하여 AI에게 '맥락'으로 제공합니다.
-  const featureContext = existingFeatures.length > 0 
-    ? existingFeatures.map(f => `- ID: ${f.id}, 제목: ${f.title}`).join('\n')
-    : "현재 등록된 기존 기능 없음";
-    
   /**
-   * 2. [핵심] 멘토님 피드백을 반영한 시스템 프롬프트 (System Prompt)
+   * 토큰 다이어트 (Token Defense)
+   * 기존 기능을 모두 보내지 않고 최신 10개만 보냅니다.
+   */
+  const featureContext = existingFeatures.length > 0 
+    ? existingFeatures
+        .slice(0, 10) 
+        .map(f => `- ID: ${f.id}, 제목: ${f.title}`)
+        .join('\n')
+    : "현재 등록된 기존 기능 없음";
+
+  /**
+   * 2.시스템 프롬프트 (System Prompt)
    */
   const SYSTEM_PROMPT = `
 당신은 10년 차 수석 IT 서비스 기획자입니다. 사용자가 입력한 회의록을 분석하여 개발팀이 즉시 참고할 수 있는 [정책]을 도출하세요.
@@ -65,10 +107,12 @@ ${featureContext}
     // 4. 성공 로직: data.message에서 추출
     const content = data.message || "";
     
-    // 5. JSON 정제 및 파싱 (용수님의 성공 정규식)
+    // 5. JSON 정제 및 파싱
     const cleanedContent = content.replace(/```json/g, "").replace(/```/g, "").trim();
     const jsonStartIndex = cleanedContent.indexOf('[');
     const jsonEndIndex = cleanedContent.lastIndexOf(']') + 1;
+
+    if (jsonStartIndex === -1) return [];
     
     const finalJson = cleanedContent.substring(jsonStartIndex, jsonEndIndex);
     return JSON.parse(finalJson) as AnalysisResult[];

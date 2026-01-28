@@ -27,7 +27,7 @@
    1-1. 햄버거 메뉴 버튼
    ============================================ */
 .sidebar-toggle-btn {
-  display: none; /* 기본적으로 숨김 */
+  display: none;
   position: fixed;
   top: 1.25rem;
   left: 1.25rem;
@@ -121,7 +121,6 @@
   flex-wrap: wrap;
 }
 
-/* Header Left (Project Title) */
 .header-left {
   display: flex;
   align-items: center;
@@ -145,7 +144,6 @@
   line-height: 0;
 }
 
-/* Header Right (User Info + Logout) */
 .header-right {
   display: flex;
   align-items: center;
@@ -245,7 +243,6 @@
   animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
-/* Section Header */
 .section-header {
   margin-bottom: 1.5rem;
   display: flex;
@@ -447,31 +444,11 @@
 }
 
 /* ============================================
-   7-2. DELETING ANIMATION
-   ============================================ */
-.card-hover-wrapper.deleting {
-  animation: cardFadeOut 0.3s ease-out forwards;
-  pointer-events: none;
-}
-
-@keyframes cardFadeOut {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-}
-
-/* ============================================
    8. RESPONSIVE BREAKPOINTS
    ============================================ */
 
 /* 모바일 (767px 이하) */
 @media (max-width: 767px) {
-  /* 햄버거 버튼 표시 */
   .sidebar-toggle-btn {
     display: flex;
   }
@@ -490,7 +467,7 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 1rem;
-    padding-left: 4.5rem; /* 햄버거 버튼 공간 확보 */
+    padding-left: 4.5rem;
     gap: 1rem;
   }
 

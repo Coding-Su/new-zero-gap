@@ -6,11 +6,12 @@ import FeatureCard from '../components/dashboard/FeatureCard';
 import Sidebar from '../components/dashboard/Sidebar'; // [추가] 사이드바 컴포넌트
 import LoadingOverlay from '../components/dashboard/LoadingOverlay';
 import { 
-  fetchFeaturesByProjectId, // [수정] 프로젝트별 기능 호출
+  fetchFeaturesByProjectId,  // 프로젝트별 기능 호출
   saveFeatureToDB, 
   deleteFeatureFromDB,
-  fetchProjectsFromDB,      // [추가] 프로젝트 목록 호출
-  saveProjectToDB           // [추가] 프로젝트 저장
+  fetchProjectsFromDB,       // 프로젝트 목록 호출
+  saveProjectToDB,           // 프로젝트 저장
+  deleteProjectFromDB
 } from '../services/firebaseService';
 import { analyzeMeetingMinutes } from '../api/aiService';
 import type { Feature, HistoryItem, Project } from '../types';
@@ -110,6 +111,41 @@ const MainDashboardPage = () => {
     }
   };
 
+  // 2. 프로젝트 삭제 핸들러
+  const handleDeleteProject = async (projectId: string) => {
+    const targetProject = projects.find(p => p.id === projectId);
+    
+    // 기획적 안전장치: 사용자에게 재확인
+    if (!window.confirm(`'${targetProject?.name}' 프로젝트를 삭제하시겠습니까?\n내부에 작성된 모든 기획서가 영구 삭제됩니다.`)) {
+      return;
+    }
+
+    try {
+      // setIsLoading(true);
+      // DB에서 연쇄 삭제 실행 (FirebaseService에 작성한 로직)
+      await deleteProjectFromDB(projectId);
+
+      // 로컬 상태(목록) 업데이트
+      const updatedProjects = projects.filter(p => p.id !== projectId);
+      setProjects(updatedProjects);
+
+      // 현재 보고 있던 프로젝트를 지웠다면 다른 프로젝트로 자동 전환
+      if (selectedProjectId === projectId) {
+        if (updatedProjects.length > 0) {
+          setSelectedProjectId(updatedProjects[0].id);
+        } else {
+          setSelectedProjectId(null);
+        }
+      }
+      alert("프로젝트가 성공적으로 삭제되었습니다.");
+    } catch (error) {
+      console.error("삭제 실패:", error);
+      alert("프로젝트 삭제 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // 회의록 분석 및 업데이트 (프로젝트 귀속 로직 추가)
   const handleAnalyze = async (minutes: string) => {
     if (!selectedProjectId) {
@@ -200,6 +236,7 @@ const MainDashboardPage = () => {
           setIsSidebarOpen(false); // 프로젝트 선택 시 사이드바 닫기
         }}
         onAddProject={handleAddProject}
+        onDeleteProject={handleDeleteProject}
       />
 
       <div className="dashboard-root">

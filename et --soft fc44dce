@@ -1,0 +1,6 @@
+[33m28168fc[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m feat: 프로젝트별 관리 기능 및 연쇄 삭제 로직 도입 (v2.0)
+[33mfc44dce[m feat: 대시보드 분석, 로그인 및 상세 기획서 관리 기능 완료
+[33mb66b485[m feat: add vercel proxy settings
+[33ma06a16f[m refactor: use environment variables for firebase config
+[33m9b3374e[m feat: integrate firebase and versioning
+[33ma4c97ce[m first commit

@@ -1,5 +1,5 @@
 // src/components/dashboard/Sidebar.tsx
-import { Plus, FolderKanban, ChevronRight } from 'lucide-react';
+import { Plus, FolderKanban, ChevronRight, Trash2 } from 'lucide-react';
 import type { Project } from '../../types';
 import './Sidebar.css';
 
@@ -9,6 +9,7 @@ interface SidebarProps {
   selectedProjectId: string | null;
   onSelectProject: (id: string) => void;
   onAddProject: () => void;
+  onDeleteProject: (id: string) => void;
 }
 
 const Sidebar = ({ 
@@ -16,7 +17,8 @@ const Sidebar = ({
   projects, 
   selectedProjectId, 
   onSelectProject,
-  onAddProject 
+  onAddProject,
+  onDeleteProject 
 }: SidebarProps) => {
   return (
     <aside className={`zg-sidebar ${isOpen ? 'open' : ''}`}>
@@ -41,9 +43,25 @@ const Sidebar = ({
                 className={`project-item ${selectedProjectId === project.id ? 'active' : ''}`}
                 onClick={() => onSelectProject(project.id)}
               >
-                <FolderKanban size={18} className="project-icon" />
-                <span className="project-name">{project.name}</span>
-                <ChevronRight size={14} className="arrow-icon" />
+                <div className="project-info-group">
+                  <FolderKanban size={18} className="project-icon" />
+                  <span className="project-name">{project.name}</span>
+                </div>
+
+                <div className="project-action-group">
+                  {/* ⭐ 3. 삭제 버튼 추가 */}
+                  <button 
+                    className="project-del-icon-btn"
+                    onClick={(e) => {
+                      e.stopPropagation(); // ❗ 클릭 이벤트 전파 차단 (프로젝트 선택 방지)
+                      onDeleteProject(project.id);
+                    }}
+                    title="프로젝트 삭제"
+                  >
+                    <Trash2 size={14} />
+                  </button>  
+                  <ChevronRight size={14} className="arrow-icon" />
+                </div>  
               </div>
             ))
           )}
