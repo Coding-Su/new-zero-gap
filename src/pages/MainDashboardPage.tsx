@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  LogOut, User, Search, Menu, X, 
-  Clock, FileText, ChevronRight, CheckCircle2, Wand2 
+import {
+  LogOut, User, Search, Menu, X,
+  Clock, FileText, ChevronRight, CheckCircle2, Wand2
 } from 'lucide-react';
 
 // 컴포넌트 임포트
@@ -12,9 +12,9 @@ import Sidebar from '../components/dashboard/Sidebar';
 import LoadingOverlay from '../components/dashboard/LoadingOverlay';
 
 // 서비스 및 API 임포트
-import { 
+import {
   fetchFeaturesByProjectId,
-  saveFeatureToDB, 
+  saveFeatureToDB,
   deleteFeatureFromDB,
   fetchProjectsFromDB,
   saveProjectToDB,
@@ -22,7 +22,8 @@ import {
   saveMeetingLogToDB,
   fetchMeetingLogsByProjectId
 } from '../services/firebaseService';
-import { refineMeetingMinutes, analyzeMeetingMinutes } from '../api/aiService'; // [Step 1, 2 함수]
+import { refineMeetingMinutes, analyzeMeetingMinutes } from '../api/aiService';
+import { calculateSimilarity } from '../utils'; // [Step 1, 2 함수]
 
 // 타입 임포트
 import type { Feature, HistoryItem, Project, MeetingLog, AnalysisResult } from '../types';
@@ -119,7 +120,7 @@ const MainDashboardPage = () => {
       }));
 
       setStagedFeatures(safeResults)
-      
+
       setStagedFeatures(results);
       setStagingStep('review_features'); // 2차 검수 모달(카드 검수)로 이동
     } catch (error) {
@@ -131,85 +132,85 @@ const MainDashboardPage = () => {
 
   // [Step 3] 사용자가 최종 승인한 데이터를 DB에 저장 (최종 관문)
   const handleFinalSubmit = async () => {
-  if (!window.confirm("검수하신 내용을 바탕으로 기획서를 업데이트하시겠습니까?")) return;
-  setIsLoading(true);
+    if (!window.confirm("검수하신 내용을 바탕으로 기획서를 업데이트하시겠습니까?")) return;
+    setIsLoading(true);
 
-  try {
-    let updatedFeatures: Feature[] = [...features];
-    const affectedIds: string[] = [];
+    try {
+      let updatedFeatures: Feature[] = [...features];
+      const affectedIds: string[] = [];
 
-    stagedFeatures.forEach(res => {
-      // 1. AI가 준 ID가 실제 우리 리스트에 있는지 확인 (매우 중요)
-      const targetIndex = updatedFeatures.findIndex(f => f.id === res.matchId);
-      
-      // 2. 존재하는 기능이면 해당 ID 유지, 없거나 'new'면 새로 생성
-      const isExisting = targetIndex !== -1;
-      const featureId = isExisting ? (res.matchId as string) : crypto.randomUUID();
-      affectedIds.push(featureId);
+      stagedFeatures.forEach(res => {
+        // 1. AI가 준 ID가 실제 우리 리스트에 있는지 확인 (매우 중요)
+        const targetIndex = updatedFeatures.findIndex(f => f.id === res.matchId);
 
-      const newHist: HistoryItem = {
+        // 2. 존재하는 기능이면 해당 ID 유지, 없거나 'new'면 새로 생성
+        const isExisting = targetIndex !== -1;
+        const featureId = isExisting ? (res.matchId as string) : crypto.randomUUID();
+        affectedIds.push(featureId);
+
+        const newHist: HistoryItem = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toLocaleString(),
+          policyChange: res.policy || "",
+          context: res.reason || "회의 내용 참조",
+          author: currentUser.name || "익명",
+          dept: currentUser.dept || "미소속"
+        };
+
+        if (!isExisting) {
+          // [A] 신규 기능으로 추가 (AI가 'new'라고 했거나, 엉뚱한 ID를 줬을 때)
+          updatedFeatures.unshift({
+            id: featureId,
+            projectId: selectedProjectId!,
+            title: res.title || "제목 없음",
+            description: `${res.title || "신규 기능"} 분석 결과`,
+            currentPolicy: res.policy || "",
+            histories: [newHist]
+          });
+        } else {
+          // [B] 기존 기능 업데이트
+          const targetFeature = {
+            ...updatedFeatures[targetIndex],
+            currentPolicy: res.policy || "",
+            histories: [newHist, ...updatedFeatures[targetIndex].histories]
+          };
+          updatedFeatures.splice(targetIndex, 1);
+          updatedFeatures.unshift(targetFeature); // 최신 업데이트 항목을 맨 위로
+        }
+      });
+
+      // 3. DB 저장 로직 (MeetingLog 포함)
+      const finalMeetingLog: MeetingLog = {
         id: crypto.randomUUID(),
-        timestamp: new Date().toLocaleString(),
-        policyChange: res.policy || "",
-        context: res.reason || "회의 내용 참조",
+        projectId: selectedProjectId!,
+        rawContent: stagedMinutes || "",
         author: currentUser.name || "익명",
-        dept: currentUser.dept || "미소속"
+        createdAt: new Date().toLocaleString(),
+        derivedFeatureIds: affectedIds
       };
 
-      if (!isExisting) {
-        // [A] 신규 기능으로 추가 (AI가 'new'라고 했거나, 엉뚱한 ID를 줬을 때)
-        updatedFeatures.unshift({
-          id: featureId,
-          projectId: selectedProjectId!,
-          title: res.title || "제목 없음",
-          description: `${res.title || "신규 기능"} 분석 결과`,
-          currentPolicy: res.policy || "",
-          histories: [newHist]
-        });
-      } else {
-        // [B] 기존 기능 업데이트
-        const targetFeature = { 
-          ...updatedFeatures[targetIndex], 
-          currentPolicy: res.policy || "", 
-          histories: [newHist, ...updatedFeatures[targetIndex].histories] 
-        };
-        updatedFeatures.splice(targetIndex, 1);
-        updatedFeatures.unshift(targetFeature); // 최신 업데이트 항목을 맨 위로
-      }
-    });
+      await Promise.all([
+        ...updatedFeatures.map(f => saveFeatureToDB(f)),
+        saveMeetingLogToDB(finalMeetingLog)
+      ]);
 
-    // 3. DB 저장 로직 (MeetingLog 포함)
-    const finalMeetingLog: MeetingLog = {
-      id: crypto.randomUUID(),
-      projectId: selectedProjectId!,
-      rawContent: stagedMinutes || "",
-      author: currentUser.name || "익명",
-      createdAt: new Date().toLocaleString(),
-      derivedFeatureIds: affectedIds
-    };
+      // 4. 로컬 상태 즉시 반영 (이게 호출되어야 화면이 바뀝니다)
+      setFeatures([...updatedFeatures]); // 새 배열로 교체하여 리렌더링 유발
 
-    await Promise.all([
-      ...updatedFeatures.map(f => saveFeatureToDB(f)),
-      saveMeetingLogToDB(finalMeetingLog)
-    ]);
+      // 회의록 목록도 최신화
+      const updatedLogs = await fetchMeetingLogsByProjectId(selectedProjectId!);
+      setMeetingLogs(updatedLogs.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
 
-    // 4. 로컬 상태 즉시 반영 (이게 호출되어야 화면이 바뀝니다)
-    setFeatures([...updatedFeatures]); // 새 배열로 교체하여 리렌더링 유발
-    
-    // 회의록 목록도 최신화
-    const updatedLogs = await fetchMeetingLogsByProjectId(selectedProjectId!);
-    setMeetingLogs(updatedLogs.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+      setStagingStep('idle');
+      alert("기획서 카드가 성공적으로 생성/업데이트되었습니다!");
 
-    setStagingStep('idle');
-    alert("기획서 카드가 성공적으로 생성/업데이트되었습니다!");
-
-  } catch (error) {
-    console.error("저장 실패:", error);
-    alert("저장 중 문제가 발생했습니다.");
-  } finally {
-    setIsLoading(false);
-  }
-};
+    } catch (error) {
+      console.error("저장 실패:", error);
+      alert("저장 중 문제가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // --- [기타 유틸리티 핸들러] ---
   const handleAddProject = async () => {
@@ -241,14 +242,14 @@ const MainDashboardPage = () => {
     setFeatures(prev => prev.filter(f => f.id !== id));
   };
 
-  const filteredFeatures = features.filter(f => 
+  const filteredFeatures = features.filter(f =>
     f.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     f.currentPolicy.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
     <div className="dashboard-layout">
-      <Sidebar 
+      <Sidebar
         isOpen={isSidebarOpen}
         projects={projects}
         selectedProjectId={selectedProjectId}
@@ -325,11 +326,11 @@ const MainDashboardPage = () => {
           <div className="zg-modal-content large">
             <div className="zg-modal-header">
               <h3><Wand2 size={20} /> AI 회의록 정제 결과 검수</h3>
-              <button onClick={() => setStagingStep('idle')}><X size={20}/></button>
+              <button onClick={() => setStagingStep('idle')}><X size={20} /></button>
             </div>
             <div className="zg-modal-body">
               <p className="modal-guide">AI가 다듬은 내용입니다. 사실과 다른 부분이 있다면 직접 수정해주세요.</p>
-              <textarea 
+              <textarea
                 className="staged-textarea"
                 value={stagedMinutes}
                 onChange={(e) => setStagedMinutes(e.target.value)}
@@ -349,34 +350,63 @@ const MainDashboardPage = () => {
           <div className="zg-modal-content large">
             <div className="zg-modal-header">
               <h3><CheckCircle2 size={20} /> 기획 요소 추출 결과 검수</h3>
-              <button onClick={() => setStagingStep('idle')}><X size={20}/></button>
+              <button onClick={() => setStagingStep('idle')}><X size={20} /></button>
             </div>
             <div className="zg-modal-body">
               <div className="staged-features-list">
-                {stagedFeatures.map((sf, idx) => (
-                  <div key={idx} className="staged-feature-item">
-                    <div className="sf-header">
-                      <input 
-                        value={sf.title} 
-                        placeholder="기능 제목을 입력하세요 (예: 검색 필터 고도화)"
+                {stagedFeatures.map((sf, idx) => {
+                  const similar = features
+                    .map(f => ({ id: f.id, title: f.title, score: calculateSimilarity(f.title, sf.title) }))
+                    .filter(x => x.score >= 0.2) // 유사도 0.2 이상만 추천
+                    .sort((a, b) => b.score - a.score);
+
+                  return (
+                    <div key={idx} className="staged-feature-item">
+                      <div className="sf-header">
+                        {/* [추가] 신규 vs 기존 기능 선택 박스 */}
+                        <select
+                          className="feature-select-box"
+                          value={sf.matchId}
+                          onChange={(e) => {
+                            const newFeatures = [...stagedFeatures];
+                            newFeatures[idx].matchId = e.target.value;
+                            setStagedFeatures(newFeatures);
+                          }}
+                          style={{ marginRight: '8px', padding: '4px', borderRadius: '4px', border: '1px solid #ddd' }}
+                        >
+                          <option value="new">🆕 신규 기능</option>
+                          {similar.length > 0 && <optgroup label="유사한 기능 감지됨">
+                            {similar.map(s => (
+                              <option key={s.id} value={s.id}>
+                                🔗 {s.title} (유사도: {Math.round(s.score * 100)}%)
+                              </option>
+                            ))}
+                          </optgroup>}
+                          {/* 필요하다면 전체 목록을 보여줄 수도 있지만, 일단 유사한 것만 보여줍니다 */}
+                        </select>
+
+                        <input
+                          value={sf.title}
+                          placeholder="기능 제목을 입력하세요 (예: 검색 필터 고도화)"
+                          onChange={(e) => {
+                            const newFeatures = [...stagedFeatures];
+                            newFeatures[idx].title = e.target.value;
+                            setStagedFeatures(newFeatures);
+                          }}
+                        />
+                        <button onClick={() => setStagedFeatures(prev => prev.filter((_, i) => i !== idx))}>삭제</button>
+                      </div>
+                      <textarea
+                        value={sf.policy}
                         onChange={(e) => {
                           const newFeatures = [...stagedFeatures];
-                          newFeatures[idx].title = e.target.value;
+                          newFeatures[idx].policy = e.target.value;
                           setStagedFeatures(newFeatures);
                         }}
                       />
-                      <button onClick={() => setStagedFeatures(prev => prev.filter((_, i) => i !== idx))}>삭제</button>
                     </div>
-                    <textarea 
-                      value={sf.policy}
-                      onChange={(e) => {
-                        const newFeatures = [...stagedFeatures];
-                        newFeatures[idx].policy = e.target.value;
-                        setStagedFeatures(newFeatures);
-                      }}
-                    />
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
             <div className="zg-modal-footer">
@@ -391,7 +421,7 @@ const MainDashboardPage = () => {
       {selectedLog && (
         <div className="zg-modal-overlay" onClick={() => setSelectedLog(null)}>
           <div className="zg-modal-content" onClick={e => e.stopPropagation()}>
-            <div className="zg-modal-header"><h3>회의록 원문 아카이브</h3><button onClick={() => setSelectedLog(null)}><X size={20}/></button></div>
+            <div className="zg-modal-header"><h3>회의록 원문 아카이브</h3><button onClick={() => setSelectedLog(null)}><X size={20} /></button></div>
             <div className="zg-modal-body">
               <div className="log-meta"><span>📅 {selectedLog.createdAt}</span><span>👤 {selectedLog.author}</span></div>
               <div className="raw-content-box">{selectedLog.rawContent}</div>
